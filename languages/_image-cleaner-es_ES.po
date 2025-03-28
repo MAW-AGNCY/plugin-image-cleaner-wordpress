@@ -1,0 +1,8 @@
+msgid "Are you sure you want to delete the selected images?"
+msgstr "¿Estás seguro de que deseas eliminar las imágenes seleccionadas?"
+
+msgid "Images deleted successfully."
+msgstr "Imágenes eliminadas con éxito."
+
+msgid "Error deleting images: %s"
+msgstr "Error al eliminar imágenes: %s"

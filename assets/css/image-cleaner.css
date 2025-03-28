@@ -1,0 +1,20 @@
+/* Image Cleaner Plugin CSS */
+body .image-cleaner-container {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.image-cleaner-button {
+    background-color: #0073aa;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.image-cleaner-button:hover {
+    background-color: #005177;
+}

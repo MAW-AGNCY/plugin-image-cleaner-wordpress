@@ -1,0 +1,251 @@
+/* Image Cleaner Admin Styles */
+
+/* General Admin Page Styles */
+.image-cleaner-admin-wrapper {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.image-cleaner-header {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.image-cleaner-tab-navigation {
+    margin-bottom: 20px;
+    border-bottom: 2px solid #007cba;
+}
+
+.image-cleaner-tab-navigation a {
+    display: inline-block;
+    margin-right: 15px;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #007cba;
+    border: 1px solid transparent;
+    border-radius: 4px 4px 0 0;
+    font-weight: bold;
+    background-color: #f1f1f1;
+}
+
+.image-cleaner-tab-navigation a.active {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-bottom: 2px solid #fff;
+}
+
+.image-cleaner-filters-container {
+    margin-top: 20px;
+}
+
+.image-cleaner-filter {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.image-cleaner-filter label {
+    flex: 1;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.image-cleaner-filter input,
+.image-cleaner-filter select {
+    flex: 2;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.image-cleaner-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.image-cleaner-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007cba;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.image-cleaner-actions button:hover {
+    background-color: #005a8c;
+}
+
+/* Reports Page Styles */
+.image-cleaner-reports {
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+}
+
+.image-cleaner-reports h1 {
+    color: #0073aa;
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+.image-cleaner-reports p {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.report-card {
+    background: #f7f7f7;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    transition: background 0.3s, transform 0.3s;
+}
+
+.report-card:hover {
+    background: #e2e2e2;
+    transform: translateY(-2px);
+}
+
+.report-card h2 {
+    margin: 0 0 10px;
+    font-size: 24px;
+    color: #0073aa;
+}
+
+.report-card p {
+    margin: 0 0 10px;
+    font-size: 14px;
+}
+
+.report-card a.button {
+    background: #0073aa;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background 0.3s, transform 0.3s;
+}
+
+.report-card a.button:hover {
+    background: #005177;
+    transform: translateY(-2px);
+}
+/* Recovery Page Styles */
+.image-cleaner-recovery {
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+}
+
+.image-cleaner-recovery h1 {
+    color: #0073aa;
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+.image-cleaner-recovery p {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.wp-list-table th {
+    background-color: #f1f1f1;
+    padding: 10px;
+    text-align: left;
+    border-bottom: 2px solid #ddd;
+}
+
+.wp-list-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.wp-list-table .button {
+    background: #0073aa;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 3px;
+    text-decoration: none;
+    transition: background 0.3s, transform 0.3s;
+}
+
+.wp-list-table .button:hover {
+    background: #005177;
+    transform: translateY(-2px);
+}
+
+/* Email Page Styles */
+.image-cleaner-admin form {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.image-cleaner-admin form h2 {
+    margin-top: 0;
+    font-size: 20px;
+    color: #0073aa;
+}
+
+.image-cleaner-admin form label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.image-cleaner-admin form input[type="email"],
+.image-cleaner-admin form select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+}
+
+.image-cleaner-admin form button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: #0073aa;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.image-cleaner-admin form button:hover {
+    background-color: #005a8c;
+    transform: translateY(-2px);
+}
+
+.notice {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.notice-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.notice-error {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}

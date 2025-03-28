@@ -1,0 +1,19 @@
+/* Add your admin styles here */
+.image-cleaner-reports {
+    margin-top: 20px;
+}
+
+.report-card {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.report-card h2 {
+    margin-top: 0;
+}
+
+.report-card .button {
+    margin-top: 10px;
+}
