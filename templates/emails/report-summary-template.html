@@ -1,69 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Cleaner Report Summary</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            color: #333;
-            padding: 20px;
-        }
-        .container {
-            background: #ffffff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #0056b3;
-        }
-        .summary-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        .summary-table th, .summary-table td {
-            padding: 10px;
-            border: 1px solid #ddd;
-        }
-        .summary-table th {
-            background-color: #0056b3;
-            color: white;
-        }
-        .button {
-            display: inline-block;
-            background-color: #0056b3;
-            color: white;
-            text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-        }
-    </style>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Resumen de Estado</title>
 </head>
-<body>
-    <div class="container">
-        <h1>Image Cleaner Report Summary</h1>
-        <p>Hello,</p>
-        <p>Here is a summary of the latest image cleanup process:</p>
-        <table class="summary-table">
-            <tr>
-                <th>Total Images Analyzed</th>
-                <td>{{total_images}}</td>
-            </tr>
-            <tr>
-                <th>Unused Images Found</th>
-                <td>{{unused_images}}</td>
-            </tr>
-            <tr>
-                <th>Potential Space Recovered</th>
-                <td>{{recovered_space}}</td>
-            </tr>
-        </table>
-        <p>Thank you for using <strong>Image Cleaner</strong>.</p>
-        <p><a href="{{dashboard_url}}" class="button">View Details</a></p>
-    </div>
+<body style="margin: 0; padding: 0; background-color: #f9f9f9; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td style="padding: 20px 0;">
+                <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border: 1px solid #e1e1e1; border-top: 4px solid #a81010;">
+                    <tr>
+                        <td align="center" style="padding: 30px 20px; border-bottom: 1px solid #e1e1e1;">
+                            <img src="{{logo_url}}" alt="Mondays at Work" width="180" style="display: block;" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 40px 30px; color: #444444;">
+                            <h2 style="color: #a81010; margin: 0 0 20px 0;">Resumen de Optimización</h2>
+                            <p style="font-size: 16px; color: #555555;">Hola,</p>
+                            <p style="font-size: 16px; color: #555555; line-height: 1.5;">
+                                Aquí tienes el resumen del estado actual de tu biblioteca de medios en <strong>{{site_name}}</strong>.
+                            </p>
+
+                            <table width="100%" cellpadding="10" cellspacing="0" style="margin: 20px 0; border: 1px solid #e1e1e1;">
+                                <tr style="background-color: #f9f9f9;">
+                                    <td style="font-weight: bold; color: #444444; border-bottom: 1px solid #e1e1e1;">Métrica</td>
+                                    <td style="font-weight: bold; color: #444444; border-bottom: 1px solid #e1e1e1;">Valor</td>
+                                </tr>
+                                <tr>
+                                    <td style="color: #555555; border-bottom: 1px solid #e1e1e1;">Detalles del reporte</td>
+                                    <td style="color: #555555; border-bottom: 1px solid #e1e1e1;">{{message}}</td>
+                                </tr>
+                            </table>
+
+                            <div style="text-align: center; margin-top: 30px;">
+                                <a href="{{site_url}}/wp-admin/admin.php?page=image-cleaner-reports" style="background-color: #a81010; color: #ffffff; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 4px;">Ver Informe Completo</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td bgcolor="#f4f4f4" style="padding: 20px; text-align: center; font-size: 12px; color: #808080; border-top: 1px solid #e1e1e1;">
+                            &copy; {{year}} <strong>Mondays at Work</strong>.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
