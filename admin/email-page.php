@@ -116,7 +116,7 @@ $prefs = get_option('maw_email_prefs', ['summary', 'error', 'recovery']);
 
         <!-- COLUMNA DERECHA: VISTA PREVIA VISUAL (MOCKUP) -->
         <div class="maw-card" style="background:#f0f0f1; border:none; box-shadow:none;">
-            <h3 style="margin-bottom:15px;">Vista Previa (Branding)</h3>
+            <h3 style="margin-bottom:15px;">Vista Previa</h3>
             
             <!-- Mockup Visual del Email -->
             <div style="background:#fff; border:1px solid #e1e1e1; border-radius:4px; overflow:hidden; font-family:Arial, sans-serif; font-size:12px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
