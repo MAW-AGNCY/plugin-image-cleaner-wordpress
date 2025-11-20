@@ -1,11 +1,11 @@
 /* 
  * MAW IMAGE CLEANER PRO - UI STYLES
- * Version: 2.2.0
+ * Version: 2.5.0 (Enterprise)
  * Branding: Mondays at Work
  */
 
 :root {
-    /* PALETA CORPORATIVA MONDAYS AT WORK */
+    /* PALETA CORPORATIVA */
     --maw-primary: #a81010;       /* Rojo Corporativo */
     --maw-primary-hover: #850c0c; /* Rojo Oscuro */
     --maw-dark: #444444;          /* Gris Oscuro (Destacado) */
@@ -13,12 +13,12 @@
     --maw-text-sec: #808080;      /* Fuente secundaria */
     --maw-border: #e1e1e1;        /* Bordes */
     
-    /* ESTADOS */
+    /* COLORES FUNCIONALES */
     --maw-bg: #f9f9f9;
     --maw-card: #ffffff;
-    --maw-success: #46b450;       /* Verde WP */
-    --maw-warning: #f0b849;       /* Naranja */
-    --maw-danger: #dc3232;        /* Rojo Error */
+    --maw-success: #46b450;       /* Verde éxito */
+    --maw-warning: #f0b849;       /* Naranja advertencia */
+    --maw-danger: #dc3232;        /* Rojo error */
     --maw-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
@@ -52,13 +52,6 @@
     gap: 10px; 
 }
 
-.maw-title .dashicons { 
-    color: var(--maw-primary); 
-    font-size: 28px; 
-    width: 28px; 
-    height: 28px; 
-}
-
 .maw-badge { 
     background: var(--maw-primary); 
     color: #fff; 
@@ -66,30 +59,21 @@
     padding: 3px 8px; 
     border-radius: 3px; 
     text-transform: uppercase; 
-    letter-spacing: 1px; 
-    vertical-align: middle; 
-    font-weight: 600;
+    font-weight: 600; 
+    vertical-align: middle;
 }
 
-/* --- BOTONES CORPORATIVOS --- */
-.maw-wrap .button-primary {
-    background: var(--maw-primary) !important;
-    border-color: var(--maw-primary) !important;
-    color: #fff !important;
-    transition: all 0.2s ease;
-    box-shadow: none !important;
-    text-shadow: none !important;
+/* --- DASHBOARD GRID & CARDS --- */
+.maw-dashboard-grid,
+.maw-content-grid { 
+    display: grid; 
+    gap: 20px; 
+    margin-bottom: 20px; 
 }
 
-.maw-wrap .button-primary:hover, 
-.maw-wrap .button-primary:focus {
-    background: var(--maw-primary-hover) !important;
-    border-color: var(--maw-primary-hover) !important;
-    transform: translateY(-1px);
-}
-
-/* --- CARDS & DASHBOARD --- */
-.maw-dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 20px; }
+/* Responsive layout for content grid */
+.maw-content-grid { grid-template-columns: 2fr 1fr; }
+@media (max-width: 1000px) { .maw-content-grid { grid-template-columns: 1fr; } }
 
 .maw-card { 
     background: var(--maw-card); 
@@ -107,12 +91,16 @@
     font-size: 13px; 
     text-transform: uppercase; 
     color: var(--maw-text-sec); 
-    letter-spacing: 0.5px; 
-    font-weight: 600;
+    font-weight: 600; 
 }
 
-/* MÉTRICAS DASHBOARD */
-.maw-metrics-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+/* --- DASHBOARD METRICS (KPIs) --- */
+.maw-metrics-row { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+    gap: 20px; 
+    margin-bottom: 20px; 
+}
 
 .maw-metric-card { 
     background: #fff; 
@@ -122,7 +110,7 @@
     display: flex; 
     align-items: center; 
     gap: 15px; 
-    transition: transform 0.2s;
+    transition: transform 0.2s; 
 }
 .maw-metric-card:hover { transform: translateY(-2px); border-color: var(--maw-primary); }
 
@@ -133,24 +121,44 @@
     display: flex; align-items: center; justify-content: center; 
     color: var(--maw-dark); 
     font-size: 24px; 
-    border: 1px solid var(--maw-border);
+    border: 1px solid var(--maw-border); 
 }
 
-.maw-metric-card:hover .maw-metric-icon { background: var(--maw-primary); color: #fff; border-color: var(--maw-primary); }
+/* Iconos de estado */
+.maw-metric-icon.warning { background: #fff9e6; color: var(--maw-warning); border-color: #ffeeba; }
+.maw-metric-icon.danger { background: #fff5f5; color: var(--maw-danger); border-color: #ffcccc; }
 
 .maw-metric-data h4 { margin: 0; color: var(--maw-text-sec); font-size: 11px; text-transform: uppercase; }
 .maw-metric-data .value { font-size: 24px; font-weight: 700; color: var(--maw-dark); line-height: 1.2; }
 
-/* GRÁFICOS DE BARRAS */
-.maw-progress-bar { background: #eee; height: 10px; border-radius: 5px; overflow: hidden; margin: 15px 0; position: relative; }
-.maw-progress-fill { height: 100%; background: var(--maw-primary); width: 0%; transition: width 1s ease; }
-.maw-progress-label { font-size: 12px; display: flex; justify-content: space-between; color: var(--maw-text-sec); }
+/* Tarjeta especial de Ahorro */
+.maw-saving-card { border-left: 4px solid var(--maw-success) !important; background: linear-gradient(to bottom right, #fff, #f9fff9); }
+.maw-saving-value { color: var(--maw-success); }
 
+/* --- GRÁFICOS BARRAS (Tipos de archivo) --- */
 .maw-type-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; font-size: 13px; }
 .maw-type-bar-bg { flex-grow: 1; height: 6px; background: #eee; margin: 0 15px; border-radius: 3px; overflow: hidden; }
 .maw-type-bar-fill { height: 100%; background: var(--maw-primary); border-radius: 3px; }
 .maw-type-bar-fill.png { background: var(--maw-dark); }
 .maw-type-bar-fill.pdf { background: var(--maw-danger); }
+
+/* --- ACCESOS RÁPIDOS --- */
+.maw-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.maw-action-btn { 
+    display: block; 
+    background: #fff; 
+    border: 1px solid var(--maw-border); 
+    padding: 20px; 
+    border-radius: 4px; 
+    text-decoration: none; 
+    color: var(--maw-dark); 
+    transition: all 0.2s; 
+    text-align: center; 
+}
+.maw-action-btn:hover { border-color: var(--maw-primary); color: var(--maw-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.maw-action-btn .dashicons { font-size: 32px; width: 32px; height: 32px; margin-bottom: 10px; color: var(--maw-primary); }
+.maw-action-title { display: block; font-weight: 700; margin-bottom: 5px; }
+.maw-action-desc { font-size: 12px; color: var(--maw-text-sec); }
 
 /* --- TOOLBAR & FILTROS --- */
 .maw-toolbar { 
@@ -167,10 +175,30 @@
 }
 
 .maw-filters-group { display: flex; gap: 10px; align-items: center; }
-.maw-filters-group select { height: 36px; border-color: var(--maw-border); color: var(--maw-dark); }
 
-/* SWITCHER VISTAS */
-.maw-view-switcher { display: inline-flex; border: 1px solid var(--maw-border); border-radius: 4px; overflow: hidden; background: #fff; }
+/* Inputs y Selects */
+.maw-filters-group select, 
+.maw-date-input { 
+    height: 36px; 
+    border: 1px solid var(--maw-border); 
+    color: var(--maw-dark); 
+    background: #fff; 
+    border-radius: 4px; 
+    padding: 0 10px;
+    font-size: 13px;
+    box-shadow: none;
+    vertical-align: middle;
+}
+
+.maw-filters-group select:focus,
+.maw-date-input:focus {
+    border-color: var(--maw-primary);
+    box-shadow: 0 0 0 1px var(--maw-primary);
+    outline: none;
+}
+
+/* Switcher Vistas */
+.maw-view-switcher { display: inline-flex; border: 1px solid var(--maw-border); border-radius: 4px; overflow: hidden; background: #fff; vertical-align: middle; }
 .maw-view-switcher .button { 
     border: none; 
     border-radius: 0; 
@@ -179,155 +207,78 @@
     margin: 0; 
     padding: 0 12px; 
     height: 34px; 
-    border-right: 1px solid var(--maw-border); 
     line-height: 34px;
+    border-right: 1px solid var(--maw-border); 
+    box-shadow: none !important;
 }
 .maw-view-switcher .button:last-child { border-right: none; }
 .maw-view-switcher .button:hover { background: #f5f5f5; color: var(--maw-dark); }
 .maw-view-switcher .button.active { background: var(--maw-primary); color: #fff; }
-.maw-view-switcher .button .dashicons { line-height: 34px; }
 
 /* --- TABLA (LIST VIEW) --- */
 .maw-table { width: 100%; border-collapse: collapse; background: var(--maw-card); border: 1px solid var(--maw-border); }
 .maw-table th { text-align: left; padding: 15px; background: #f8f8f8; border-bottom: 1px solid var(--maw-border); font-weight: 600; color: var(--maw-dark); }
 .maw-table td { padding: 12px 15px; border-bottom: 1px solid var(--maw-border); vertical-align: middle; color: var(--maw-text); }
-.maw-table tr:hover td { background: #fffcfc; }
+.maw-table tr:hover td { background: #fffbfb; }
 .maw-img-preview { width: 50px; height: 50px; object-fit: cover; border-radius: 3px; border: 1px solid var(--maw-border); background: #eee; }
 
-/* --- CUADRÍCULA (GRID VIEW) --- */
-.maw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
-.maw-grid-item { 
-    background: #fff; 
-    border: 1px solid var(--maw-border); 
-    border-radius: 4px; 
-    overflow: hidden; 
-    transition: all 0.2s; 
-    position: relative; 
+/* Botón "Ver Archivo" */
+.maw-btn-view { 
+    display: inline-flex; align-items: center; gap: 5px; 
+    color: var(--maw-text); text-decoration: none; 
+    font-size: 11px; font-weight: 600; 
+    padding: 4px 8px; 
+    background: #f5f5f5; border: 1px solid var(--maw-border); 
+    border-radius: 3px; transition: all 0.2s; 
 }
-.maw-grid-item:hover { border-color: var(--maw-primary); box-shadow: 0 4px 12px rgba(168, 16, 16, 0.1); transform: translateY(-2px); }
-.maw-grid-item.selected { border: 2px solid var(--maw-primary); background: #fffbfb; }
+.maw-btn-view:hover { border-color: var(--maw-dark); color: var(--maw-dark); background: #fff; }
+.maw-btn-view .dashicons { font-size: 14px; width: 14px; height: 14px; color: var(--maw-text-sec); }
 
-.maw-grid-thumb { 
-    height: 140px; 
-    background: #eee; 
-    display: flex; align-items: center; justify-content: center; 
-    position: relative; 
-    overflow: hidden; 
-}
+/* --- GRID VIEW --- */
+.maw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+.maw-grid-item { background: #fff; border: 1px solid var(--maw-border); border-radius: 4px; overflow: hidden; transition: all 0.2s; position: relative; }
+.maw-grid-item:hover { border-color: var(--maw-primary); box-shadow: 0 4px 12px rgba(168, 16, 16, 0.1); transform: translateY(-2px); }
+.maw-grid-item.selected { border: 2px solid var(--maw-primary); background: #fff5f5; }
+
+.maw-grid-thumb { height: 140px; background: #eee; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
 .maw-grid-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
 .maw-grid-meta { padding: 10px; font-size: 12px; border-top: 1px solid #f0f0f0; }
 .maw-grid-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-bottom: 8px; color: var(--maw-dark); }
-
 .maw-checkbox-overlay { position: absolute; top: 10px; left: 10px; transform: scale(1.3); z-index: 5; cursor: pointer; }
 
-/* --- BADGES DE ESTADO --- */
+/* --- BADGES --- */
 .status-badge { padding: 3px 8px; border-radius: 3px; font-size: 10px; font-weight: 700; text-transform: uppercase; border: 1px solid transparent; }
 .status-badge.in-use { background: #eef9ef; color: var(--maw-success); border-color: #c6eec9; }
 .status-badge.unused { background: #fff5f5; color: var(--maw-primary); border-color: #ffcccc; }
 .status-badge.protected { background: #fff9e6; color: #b8860b; border-color: #ffeeba; }
 .status-badge.woo { background: #7f54b3; color: #fff; border: none; }
 
-/* --- AYUDA (ACORDEONES) --- */
-.maw-accordion { border: 1px solid var(--maw-border); background: var(--maw-white); margin-bottom: 10px; border-radius: 4px; }
-.maw-accordion-header { 
-    padding: 15px; 
-    background: #fcfcfc; 
-    cursor: pointer; 
-    font-weight: 600; 
-    display: flex; 
-    justify-content: space-between; 
-    color: var(--maw-dark);
-    transition: background 0.2s;
-}
-.maw-accordion-header:hover { background: #f5f5f5; }
-.maw-accordion-content { 
-    padding: 15px; 
-    display: none; 
-    border-top: 1px solid var(--maw-border); 
-    background: #fff; 
-    line-height: 1.6;
-}
-.maw-accordion.active .maw-accordion-content { display: block; }
-.maw-accordion.active .maw-accordion-header { background: #f0f0f0; color: var(--maw-primary); }
+/* --- BOTONES --- */
+.maw-wrap .button-primary { background: var(--maw-primary) !important; border-color: var(--maw-primary) !important; color: #fff !important; box-shadow: none !important; text-shadow: none !important; font-weight: 600; }
+.maw-wrap .button-primary:hover { background: var(--maw-primary-hover) !important; border-color: var(--maw-primary-hover) !important; }
 
-/* --- ACCESOS RÁPIDOS --- */
-.maw-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-.maw-action-btn { 
-    display: block; 
-    background: #fff; 
-    border: 1px solid var(--maw-border); 
-    padding: 20px; 
-    border-radius: 4px; 
-    text-decoration: none; 
-    color: var(--maw-dark); 
-    transition: all 0.2s; 
-    text-align: center; 
-}
-.maw-action-btn:hover { border-color: var(--maw-primary); color: var(--maw-primary); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-.maw-action-btn .dashicons { font-size: 32px; width: 32px; height: 32px; margin-bottom: 10px; color: var(--maw-primary); }
-.maw-action-title { display: block; font-weight: 700; margin-bottom: 5px; }
-.maw-action-desc { font-size: 12px; color: var(--maw-text-sec); }
+/* Botón Pequeño (Whitelist) */
+.maw-whitelist-action { color: var(--maw-text-sec) !important; border-color: var(--maw-border) !important; }
+.maw-whitelist-action:hover { color: var(--maw-primary) !important; border-color: var(--maw-primary) !important; }
+
+/* Botón Borrar Link */
+.button-link-delete { color: var(--maw-danger) !important; text-decoration: none; }
+.button-link-delete:hover { background: #fff5f5 !important; border-color: var(--maw-danger) !important; }
 
 /* --- PAGINACIÓN --- */
 .tablenav { margin: 20px 0; }
-.tablenav-pages .button { background: #fff; margin: 0 2px; padding: 5px 10px; border: 1px solid var(--maw-border); color: var(--maw-text); }
+.tablenav-pages .button { background: #fff; margin: 0 2px; padding: 0 10px; border: 1px solid var(--maw-border); color: var(--maw-text); line-height: 28px; }
 .tablenav-pages .button.button-primary { background: var(--maw-primary); color: #fff; border-color: var(--maw-primary); }
 
+/* --- ACORDEONES (AYUDA) --- */
+.maw-accordion { border: 1px solid var(--maw-border); background: var(--maw-white); margin-bottom: 10px; border-radius: 4px; }
+.maw-accordion-header { padding: 15px; background: #fcfcfc; cursor: pointer; font-weight: 600; display: flex; justify-content: space-between; color: var(--maw-dark); transition: background 0.2s; }
+.maw-accordion-header:hover { background: #f5f5f5; }
+.maw-accordion-content { padding: 15px; display: none; border-top: 1px solid var(--maw-border); background: #fff; line-height: 1.6; }
+.maw-accordion.active .maw-accordion-content { display: block; }
+.maw-accordion.active .maw-accordion-header { background: #f0f0f0; color: var(--maw-primary); }
+
 /* --- ALERTAS --- */
-.maw-alert { padding: 15px; border-left: 4px solid var(--maw-primary); background: #fff; margin-bottom: 20px; box-shadow: var(--maw-shadow); }
-.maw-alert.warning { border-color: var(--maw-warning); }
-
-
-/* ... (Mantener todo el CSS anterior de la versión 2.2.0) ... */
-
-/* --- MEJORAS v2.4.0 --- */
-
-/* Inputs de Fecha en Toolbar */
-.maw-date-input {
-    border: 1px solid var(--maw-border);
-    border-radius: 4px;
-    padding: 0 8px;
-    height: 36px;
-    color: var(--maw-text);
-    background: #fff;
-    font-size: 12px;
-}
-
-/* Botón "Ver Archivo" Estilizado */
-.maw-btn-view {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: #f0f0f1;
-    border: 1px solid #dcdcde;
-    color: var(--maw-text);
-    text-decoration: none;
-    padding: 3px 8px;
-    border-radius: 3px;
-    font-size: 11px;
-    font-weight: 600;
-    transition: all 0.2s;
-}
-.maw-btn-view:hover {
-    background: #fff;
-    border-color: var(--maw-primary);
-    color: var(--maw-primary);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-.maw-btn-view .dashicons {
-    font-size: 14px;
-    width: 14px;
-    height: 14px;
-}
-
-/* Tarjeta de Ahorro (Dashboard) */
-.maw-saving-card {
-    background: linear-gradient(135deg, #ffffff 0%, #fcfcfc 100%);
-    border-left: 4px solid var(--maw-success) !important;
-}
-.maw-saving-value {
-    color: var(--maw-success);
-    font-size: 28px;
-    font-weight: 700;
-}
+.maw-alert { padding: 15px; border-left: 4px solid var(--maw-primary); background: #fff; margin-bottom: 20px; box-shadow: var(--maw-shadow); border-radius: 4px; border: 1px solid var(--maw-border); border-left-width: 4px; }
+.maw-alert.warning { border-left-color: var(--maw-warning); }
