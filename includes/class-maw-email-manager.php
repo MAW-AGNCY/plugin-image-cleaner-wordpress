@@ -5,38 +5,36 @@ class MAW_Email_Manager {
 
     /**
      * Verifica si un tipo de notificación está activo en la configuración.
-     * 
-     * @param string $type Tipo de alerta: 'summary', 'recovery', 'error', 'clean'.
-     * @return bool
      */
     public static function is_active($type) {
-        // Por defecto (si no existe la opción), activamos todo para no perder info.
         $defaults = ['summary', 'recovery', 'error'];
         $prefs = get_option('maw_email_prefs', $defaults);
-
-        // Si la opción está vacía (array vacío), es que el usuario desactivó todo.
+        
+        // Si la opción no existe o es array vacío, asumimos que el usuario no quiere nada
+        // a menos que sea la primera instalación (handled by defaults in get_option)
         if (!is_array($prefs)) return false;
 
         return in_array($type, $prefs);
     }
 
     /**
-     * Envía correo HTML con Branding de Mondays at Work.
+     * Envía correo HTML con Branding.
+     * Soporta múltiples destinatarios (separados por coma).
      * 
-     * @param string $to Destinatario
+     * @param string $to Destinatario(s)
      * @param string $subject Asunto
      * @param string $template_name Nombre del archivo template
      * @param array $data Datos a reemplazar
-     * @param string $type (Opcional) Tipo de notificación para verificar preferencia antes de enviar.
+     * @param string $type (Opcional) Tipo de notificación para verificar preferencia.
      */
     public static function send($to, $subject, $template_name, $data = [], $type = null) {
         
-        // 1. Verificar Preferencia (Si se pasa el tipo)
+        // 1. Verificar Preferencia
         if ($type !== null && !self::is_active($type)) {
-            return false; // El usuario eligió no recibir esto
+            return false; // El usuario desactivó este tipo de alerta
         }
 
-        // 2. Forzar Header HTML
+        // 2. Headers HTML
         add_filter('wp_mail_content_type', [__CLASS__, 'set_html_content_type']);
 
         // 3. Cargar plantilla
@@ -45,7 +43,7 @@ class MAW_Email_Manager {
         if (file_exists($file)) {
             $body = file_get_contents($file);
         } else {
-            $body = '<h1>MAW Image Cleaner</h1><p>{{message}}</p>';
+            $body = '<div style="padding:20px; font-family:sans-serif;"><h1>MAW Image Cleaner</h1><p>{{message}}</p></div>';
         }
 
         // 4. Variables Corporativas
@@ -66,14 +64,19 @@ class MAW_Email_Manager {
         ];
 
         if(!isset($data['{{message}}'])) $data['{{message}}'] = 'Notificación del sistema.';
+        
         $final_data = array_merge($defaults, $data);
 
+        // Reemplazo
         foreach ($final_data as $key => $val) {
             $body = str_replace($key, $val, $body);
         }
 
         // 5. Enviar
+        // wp_mail acepta string "email1, email2" perfectamente
         $result = wp_mail($to, $subject, $body);
+        
+        // Limpiar filtro
         remove_filter('wp_mail_content_type', [__CLASS__, 'set_html_content_type']);
 
         return $result;
