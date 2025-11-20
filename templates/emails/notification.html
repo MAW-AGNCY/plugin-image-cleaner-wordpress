@@ -1,50 +1,81 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="UTF-8">
-    <title>Notificación MAW Image Cleaner</title>
-    <style type="text/css">
-        body { margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, sans-serif; color: #333333; }
-        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .header { background-color: #2271b1; padding: 20px; text-align: center; color: #ffffff; }
-        .header h1 { margin: 0; font-size: 22px; font-weight: normal; }
-        .content { padding: 30px; line-height: 1.6; }
-        .footer { background-color: #eeeeee; padding: 15px; text-align: center; font-size: 12px; color: #888888; }
-        .button { display: inline-block; padding: 10px 20px; background-color: #2271b1; color: #ffffff; text-decoration: none; border-radius: 4px; margin-top: 20px; font-weight: bold; }
-        .warning-box { background: #fff8e5; border-left: 4px solid #dba617; padding: 10px; margin: 15px 0; font-size: 14px; }
-    </style>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Notificación MAW</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
-<body>
-    <div style="padding: 20px;">
-        <div class="container">
-            <!-- Cabecera -->
-            <div class="header">
-                <h1>{{plugin_name}}</h1>
-            </div>
-            
-            <!-- Contenido -->
-            <div class="content">
-                <h2>Hola, Administrador</h2>
-                <p>{{message}}</p>
-                
-                <div class="warning-box">
-                    <strong>Estado del Sistema:</strong> Funcionando correctamente.<br>
-                    <strong>Fecha:</strong> {{year}}
-                </div>
+<body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td style="padding: 20px 0 30px 0;">
+                <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; background-color: #ffffff; border: 1px solid {{border_color}}; border-top: 4px solid {{primary_color}};">
+                    
+                    <!-- HEADER LOGO -->
+                    <tr>
+                        <td align="center" style="padding: 30px 20px; border-bottom: 1px solid {{border_color}};">
+                            <img src="{{logo_url}}" alt="Mondays at Work" width="200" style="display: block;" />
+                        </td>
+                    </tr>
 
-                <p>Puedes gestionar tu biblioteca de medios accediendo al panel:</p>
-                
-                <center>
-                    <a href="{{site_url}}/wp-admin/admin.php?page=image-cleaner-overview" class="button" style="color:#ffffff;">Ir al Dashboard</a>
-                </center>
-            </div>
+                    <!-- CONTENIDO -->
+                    <tr>
+                        <td bgcolor="#ffffff" style="padding: 40px 30px; color: {{dark_color}};">
+                            <h2 style="font-size: 22px; margin: 0 0 20px 0; color: {{primary_color}};">Hola, Administrador</h2>
+                            
+                            <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px; color: #555555;">
+                                {{message}}
+                            </p>
 
-            <!-- Pie de página -->
-            <div class="footer">
-                &copy; {{year}} <strong>{{site_name}}</strong>.<br>
-                Optimizado por <a href="https://www.mondaysatwork.com" style="color:#666;">Mondays at Work</a>
-            </div>
-        </div>
-    </div>
+                            <!-- CAJA DE DATOS -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f9f9f9; border-radius: 4px; border: 1px solid {{border_color}};">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <p style="margin: 0; font-size: 14px; color: {{text_color}};">
+                                            <strong>Plugin:</strong> {{plugin_name}}<br>
+                                            <strong>Sitio Web:</strong> {{site_name}}<br>
+                                            <strong>Fecha:</strong> {{year}}
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- BOTÓN CTA -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 30px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{site_url}}/wp-admin/admin.php?page=image-cleaner-overview" style="background-color: {{primary_color}}; color: #ffffff; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 4px; display: inline-block;">Ir al Dashboard</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- FOOTER -->
+                    <tr>
+                        <td bgcolor="#f4f4f4" style="padding: 30px 30px; border-top: 1px solid {{border_color}};">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td style="color: {{text_color}}; font-size: 12px; text-align: center;">
+                                        &copy; {{year}} <strong>Mondays at Work</strong>. Todos los derechos reservados.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding: 15px 0 0 0;">
+                                        <!-- REDES SOCIALES (Texto/Enlaces limpios para evitar bloqueo de imágenes) -->
+                                        <a href="{{social_fb}}" style="color: {{dark_color}}; text-decoration: none; margin: 0 10px; font-weight:bold;">Facebook</a> | 
+                                        <a href="{{social_x}}" style="color: {{dark_color}}; text-decoration: none; margin: 0 10px; font-weight:bold;">X (Twitter)</a> | 
+                                        <a href="{{social_in}}" style="color: {{dark_color}}; text-decoration: none; margin: 0 10px; font-weight:bold;">LinkedIn</a> |
+                                        <a href="{{social_gh}}" style="color: {{dark_color}}; text-decoration: none; margin: 0 10px; font-weight:bold;">GitHub</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
