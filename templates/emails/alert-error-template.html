@@ -1,90 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alerta de Error</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
-        }
-        .alert-container {
-            max-width: 600px;
-            margin: 50px auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            border: 1px solid #f2dede;
-        }
-        .alert-header {
-            text-align: center;
-            padding: 15px 0;
-            border-bottom: 2px solid #ebccd1;
-        }
-        .alert-header h1 {
-            margin: 0;
-            color: #a94442;
-            font-size: 24px;
-        }
-        .alert-body {
-            padding: 20px 0;
-        }
-        .alert-body h2 {
-            margin-bottom: 10px;
-            color: #a94442;
-            font-size: 20px;
-        }
-        .alert-body p {
-            margin: 15px 0;
-            font-size: 16px;
-            color: #555;
-        }
-        .alert-body .error-details {
-            background: #f2dede;
-            color: #a94442;
-            padding: 10px;
-            border-radius: 3px;
-            border: 1px solid #ebccd1;
-        }
-        .alert-footer {
-            text-align: center;
-            margin-top: 20px;
-            padding: 10px 0;
-            font-size: 12px;
-            color: #aaa;
-            border-top: 1px solid #ebccd1;
-        }
-        .alert-footer a {
-            color: #a94442;
-            text-decoration: none;
-        }
-    </style>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Alerta de Error - MAW Cleaner</title>
 </head>
-<body>
-    <div class="alert-container">
-        <div class="alert-header">
-            <h1>¡Ha ocurrido un error!</h1>
-        </div>
-        <div class="alert-body">
-            <h2>Detalles del Error</h2>
-            <p>Lo sentimos, pero ocurrió un problema durante el proceso. Por favor, revisa los detalles a continuación y toma las acciones necesarias.</p>
+<body style="margin: 0; padding: 0; background-color: #f9f9f9; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td style="padding: 20px 0;">
+                <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border: 1px solid #e1e1e1; border-top: 4px solid #a81010;">
+                    <!-- LOGO -->
+                    <tr>
+                        <td align="center" style="padding: 30px 20px; border-bottom: 1px solid #e1e1e1;">
+                            <img src="{{logo_url}}" alt="Mondays at Work" width="180" style="display: block;" />
+                        </td>
+                    </tr>
+                    <!-- CONTENIDO -->
+                    <tr>
+                        <td style="padding: 40px 30px; color: #444444;">
+                            <h2 style="color: #a81010; margin: 0 0 20px 0; font-size: 22px;">⚠️ Se ha detectado un error</h2>
+                            <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px; color: #555555;">
+                                Hola Administrador,<br><br>
+                                El plugin <strong>{{plugin_name}}</strong> ha encontrado un problema durante una operación automática.
+                            </p>
+                            
+                            <!-- CAJA DE ERROR -->
+                            <div style="background-color: #fff5f5; border-left: 4px solid #a81010; padding: 15px; margin-bottom: 20px;">
+                                <strong style="color: #a81010;">Detalles del Error:</strong><br>
+                                <span style="color: #555555; font-family: monospace;">{{error_message}}</span>
+                            </div>
 
-            <div class="error-details">
-                <p><strong>Mensaje del error:</strong> {{error_message}}</p>
-                <p><strong>Código del error:</strong> {{error_code}}</p>
-                <p><strong>Archivo:</strong> {{error_file}}</p>
-                <p><strong>Línea:</strong> {{error_line}}</p>
-            </div>
-        </div>
-        <div class="alert-footer">
-            <p>Si necesitas ayuda, por favor contacta con nuestro <a href="{{support_url}}">soporte técnico</a>.</p>
-        </div>
-    </div>
+                            <p style="font-size: 14px; color: #808080;">
+                                Por favor, revisa el panel de control o contacta con soporte si el problema persiste.
+                            </p>
+                            
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td align="center" style="padding-top: 20px;">
+                                        <a href="{{site_url}}/wp-admin/admin.php?page=image-cleaner-overview" style="background-color: #444444; color: #ffffff; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 4px; font-size: 14px;">Ir al Dashboard</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <!-- FOOTER -->
+                    <tr>
+                        <td bgcolor="#f4f4f4" style="padding: 20px; text-align: center; font-size: 12px; color: #808080; border-top: 1px solid #e1e1e1;">
+                            &copy; {{year}} <strong>Mondays at Work</strong>.<br>
+                            <a href="{{site_url}}" style="color: #a81010; text-decoration: none;">{{site_name}}</a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
