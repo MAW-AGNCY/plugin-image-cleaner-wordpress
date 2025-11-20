@@ -277,3 +277,57 @@
 /* --- ALERTAS --- */
 .maw-alert { padding: 15px; border-left: 4px solid var(--maw-primary); background: #fff; margin-bottom: 20px; box-shadow: var(--maw-shadow); }
 .maw-alert.warning { border-color: var(--maw-warning); }
+
+
+/* ... (Mantener todo el CSS anterior de la versión 2.2.0) ... */
+
+/* --- MEJORAS v2.4.0 --- */
+
+/* Inputs de Fecha en Toolbar */
+.maw-date-input {
+    border: 1px solid var(--maw-border);
+    border-radius: 4px;
+    padding: 0 8px;
+    height: 36px;
+    color: var(--maw-text);
+    background: #fff;
+    font-size: 12px;
+}
+
+/* Botón "Ver Archivo" Estilizado */
+.maw-btn-view {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #f0f0f1;
+    border: 1px solid #dcdcde;
+    color: var(--maw-text);
+    text-decoration: none;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+.maw-btn-view:hover {
+    background: #fff;
+    border-color: var(--maw-primary);
+    color: var(--maw-primary);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.maw-btn-view .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+/* Tarjeta de Ahorro (Dashboard) */
+.maw-saving-card {
+    background: linear-gradient(135deg, #ffffff 0%, #fcfcfc 100%);
+    border-left: 4px solid var(--maw-success) !important;
+}
+.maw-saving-value {
+    color: var(--maw-success);
+    font-size: 28px;
+    font-weight: 700;
+}
