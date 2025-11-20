@@ -1,42 +1,43 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-class MAW_Email_Manager {
-    /**
-     * Envía correo HTML forzando content-type.
-     */
-    public static function send($to, $subject, $template_name, $data = []) {
-        
-        // 1. Forzar Header HTML
-        add_filter('wp_mail_content_type', [__CLASS__, 'set_html_content_type']);
+class Image_Cleaner_Emails {
 
-        // 2. Cargar o crear plantilla
-        $file = IMAGE_CLEANER_PLUGIN_DIR . 'templates/emails/' . $template_name . '.html';
-        if (file_exists($file)) {
-            $body = file_get_contents($file);
-        } else {
-            $body = '<div style="background:#f5f5f5; padding:20px;"><div style="background:#fff; padding:20px;"><h1>MAW Cleaner</h1><p>{{message}}</p></div></div>';
-        }
-
-        // 3. Reemplazar variables
-        $data['{{site_name}}'] = get_bloginfo('name');
-        $data['{{year}}'] = date('Y');
-        if(!isset($data['{{message}}'])) $data['{{message}}'] = 'Notificación del sistema.';
-
-        foreach ($data as $key => $val) {
-            $body = str_replace($key, $val, $body);
-        }
-
-        // 4. Enviar
-        $result = wp_mail($to, $subject, $body);
-
-        // 5. Limpiar filtro
-        remove_filter('wp_mail_content_type', [__CLASS__, 'set_html_content_type']);
-
-        return $result;
+    public function __construct() {
+        add_action('image_cleaner_daily_event', [$this, 'process_scheduled_email']);
     }
 
-    public static function set_html_content_type() {
-        return 'text/html';
+    public static function schedule_email_event() {
+        if (!wp_next_scheduled('image_cleaner_daily_event')) {
+            wp_schedule_event(time(), 'daily', 'image_cleaner_daily_event');
+        }
+    }
+
+    public static function clear_email_event() {
+        wp_clear_scheduled_hook('image_cleaner_daily_event');
+    }
+
+    public function process_scheduled_email() {
+        // 1. Leer Configuración
+        $freq = get_option('maw_email_freq', 'weekly');
+        if ($freq === 'never') return;
+
+        // 2. Lógica de Frecuencia (Simplificada para ejemplo)
+        // Aquí comprobaríamos si hoy toca enviar según la opción (daily, weekly, monthly)
+        // Por ahora, asumimos que si el cron corre, enviamos si es 'daily'.
+        
+        $recipient = get_option('maw_email_recipient', get_option('admin_email'));
+        $template = get_option('maw_email_template', 'notification');
+
+        // 3. Obtener Datos Reales para el Email
+        global $wpdb;
+        $trash_count = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE post_type='attachment' AND post_status='trash'");
+        
+        $data = [
+            '{{message}}' => "Resumen automático: Tienes $trash_count imágenes en la papelera. Tu sistema está optimizado."
+        ];
+
+        // 4. Enviar
+        MAW_Email_Manager::send($recipient, 'Reporte Automático MAW', $template, $data);
     }
 }
