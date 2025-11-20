@@ -14,10 +14,10 @@ class Image_Cleaner_Admin {
     }
 
     public function register_admin_menu() {
-        // Menú Principal (Dashboard)
+        // 1. Menú Principal (Dashboard)
         add_menu_page(
-            __('MAW Cleaner', 'image-cleaner'),
-            __('MAW Cleaner', 'image-cleaner'),
+            __('MAW Cleaner', 'image-cleaner'), // Título página
+            __('MAW Cleaner', 'image-cleaner'), // Título menú
             'manage_options',
             'image-cleaner-overview',
             [$this, 'render_overview_page'],
@@ -25,7 +25,7 @@ class Image_Cleaner_Admin {
             80
         );
 
-        // Submenú: Dashboard (Repetido para que sea la primera opción)
+        // 2. Submenú: Dashboard (Repetido para UX estándar de WP)
         add_submenu_page(
             'image-cleaner-overview',
             __('Dashboard', 'image-cleaner'),
@@ -35,7 +35,7 @@ class Image_Cleaner_Admin {
             [$this, 'render_overview_page']
         );
 
-        // Submenú: Filtros y Limpieza
+        // 3. Submenú: Filtros (Escáner)
         add_submenu_page(
             'image-cleaner-overview',
             __('Escanear y Limpiar', 'image-cleaner'),
@@ -45,7 +45,7 @@ class Image_Cleaner_Admin {
             [$this, 'render_filters_page']
         );
 
-        // Submenú: Reportes (Auditoría)
+        // 4. Submenú: Reportes (Auditoría)
         add_submenu_page(
             'image-cleaner-overview',
             __('Reportes y Auditoría', 'image-cleaner'),
@@ -55,7 +55,7 @@ class Image_Cleaner_Admin {
             [$this, 'render_reports_page']
         );
 
-        // Submenú: Recuperación
+        // 5. Submenú: Recuperación (Papelera)
         add_submenu_page(
             'image-cleaner-overview',
             __('Papelera / Recuperación', 'image-cleaner'),
@@ -65,33 +65,44 @@ class Image_Cleaner_Admin {
             [$this, 'render_recovery_page']
         );
 
-        // Submenú: Configuración Email
+        // 6. Submenú: Configuración Email
         add_submenu_page(
             'image-cleaner-overview',
             __('Notificaciones', 'image-cleaner'),
-            __('Emails', 'image-cleaner'),
+            __('Notificaciones', 'image-cleaner'), // Nombre más corto para menú
             'manage_options',
             'image-cleaner-emails',
             [$this, 'render_emails_page']
         );
+
+        // 7. NUEVO: Submenú Ayuda y Soporte
+        add_submenu_page(
+            'image-cleaner-overview',
+            __('Centro de Ayuda', 'image-cleaner'),
+            __('Ayuda', 'image-cleaner'),
+            'manage_options',
+            'image-cleaner-help',
+            [$this, 'render_help_page']
+        );
     }
 
     public function enqueue_admin_scripts($hook) {
+        // Solo cargar assets en páginas que contengan 'image-cleaner'
         if (strpos($hook, 'image-cleaner') === false) return;
 
-        // Cargamos el CSS global de la interfaz
+        // CSS UI Premium
         wp_enqueue_style(
             'maw-admin-ui', 
             IMAGE_CLEANER_PLUGIN_URL . 'assets/css/maw-admin-ui.css', 
             [], 
-            '1.2.0'
+            '2.0.0' // Versión actualizada
         );
         
-        // Scripts generales si son necesarios
+        // jQuery es necesario para los scripts de UI
         wp_enqueue_script('jquery');
     }
 
-    // --- Funciones de Renderizado --- //
+    // --- Funciones de Renderizado de Vistas --- //
 
     public function render_overview_page() {
         $this->load_view('overview-page.php');
@@ -114,14 +125,27 @@ class Image_Cleaner_Admin {
     }
 
     /**
-     * Helper para cargar vistas de forma segura
+     * Renderiza la página de ayuda.
+     */
+    public function render_help_page() {
+        $this->load_view('help-page.php');
+    }
+
+    /**
+     * Helper privado para cargar vistas de forma segura y DRY.
      */
     private function load_view($filename) {
         $file = IMAGE_CLEANER_PLUGIN_DIR . 'admin/' . $filename;
         if (file_exists($file)) {
             include $file;
         } else {
-            echo '<div class="notice notice-error"><p>Error: No se encuentra el archivo de vista: ' . esc_html($filename) . '</p></div>';
+            // Mensaje de error amigable en el admin
+            echo '<div class="maw-wrap"><div class="notice notice-error inline"><p>';
+            printf(
+                esc_html__('Error crítico: No se encuentra el archivo de vista "%s". Por favor, verifica la instalación del plugin.', 'image-cleaner'),
+                esc_html($filename)
+            );
+            echo '</p></div></div>';
         }
     }
 }
