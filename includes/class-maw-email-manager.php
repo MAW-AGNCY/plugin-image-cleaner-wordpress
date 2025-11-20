@@ -4,24 +4,51 @@ if (!defined('ABSPATH')) exit;
 class MAW_Email_Manager {
 
     /**
-     * Envía correo HTML con Branding de Mondays at Work.
+     * Verifica si un tipo de notificación está activo en la configuración.
+     * 
+     * @param string $type Tipo de alerta: 'summary', 'recovery', 'error', 'clean'.
+     * @return bool
      */
-    public static function send($to, $subject, $template_name, $data = []) {
+    public static function is_active($type) {
+        // Por defecto (si no existe la opción), activamos todo para no perder info.
+        $defaults = ['summary', 'recovery', 'error'];
+        $prefs = get_option('maw_email_prefs', $defaults);
+
+        // Si la opción está vacía (array vacío), es que el usuario desactivó todo.
+        if (!is_array($prefs)) return false;
+
+        return in_array($type, $prefs);
+    }
+
+    /**
+     * Envía correo HTML con Branding de Mondays at Work.
+     * 
+     * @param string $to Destinatario
+     * @param string $subject Asunto
+     * @param string $template_name Nombre del archivo template
+     * @param array $data Datos a reemplazar
+     * @param string $type (Opcional) Tipo de notificación para verificar preferencia antes de enviar.
+     */
+    public static function send($to, $subject, $template_name, $data = [], $type = null) {
         
-        // 1. Forzar Header HTML
+        // 1. Verificar Preferencia (Si se pasa el tipo)
+        if ($type !== null && !self::is_active($type)) {
+            return false; // El usuario eligió no recibir esto
+        }
+
+        // 2. Forzar Header HTML
         add_filter('wp_mail_content_type', [__CLASS__, 'set_html_content_type']);
 
-        // 2. Cargar plantilla
+        // 3. Cargar plantilla
         $file = IMAGE_CLEANER_PLUGIN_DIR . 'templates/emails/' . $template_name . '.html';
         
         if (file_exists($file)) {
             $body = file_get_contents($file);
         } else {
-            // Fallback por si no existe el archivo
             $body = '<h1>MAW Image Cleaner</h1><p>{{message}}</p>';
         }
 
-        // 3. VARIABLES CORPORATIVAS (Branding)
+        // 4. Variables Corporativas
         $defaults = [
             '{{site_name}}'    => get_bloginfo('name'),
             '{{site_url}}'     => home_url(),
@@ -32,29 +59,21 @@ class MAW_Email_Manager {
             '{{dark_color}}'   => '#444444',
             '{{text_color}}'   => '#808080',
             '{{border_color}}' => '#e1e1e1',
-            
-            // Redes Sociales
             '{{social_fb}}'    => 'https://www.facebook.com/mondaysatwork',
             '{{social_x}}'     => 'https://x.com/mondaysatwork/',
             '{{social_in}}'    => 'https://www.linkedin.com/company/mondays-at-work',
             '{{social_gh}}'    => 'https://github.com/orgs/Mondays-at-work'
         ];
 
-        // Mensaje por defecto si no se pasa
         if(!isset($data['{{message}}'])) $data['{{message}}'] = 'Notificación del sistema.';
-
-        // Fusionar datos
         $final_data = array_merge($defaults, $data);
 
-        // 4. Reemplazo de variables en el HTML
         foreach ($final_data as $key => $val) {
             $body = str_replace($key, $val, $body);
         }
 
         // 5. Enviar
         $result = wp_mail($to, $subject, $body);
-
-        // 6. Limpiar filtro
         remove_filter('wp_mail_content_type', [__CLASS__, 'set_html_content_type']);
 
         return $result;
