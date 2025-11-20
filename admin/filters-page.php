@@ -18,13 +18,15 @@ $filter_source = isset($_GET['fsource']) ? sanitize_text_field($_GET['fsource'])
 $date_start = isset($_GET['dstart']) ? sanitize_text_field($_GET['dstart']) : '';
 $date_end   = isset($_GET['dend']) ? sanitize_text_field($_GET['dend']) : '';
 
-// --- BORRADO ---
+// --- LÓGICA DE BORRADO ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['do_delete'])) {
     check_admin_referer('maw_clean_action', 'maw_nonce');
     $ids = isset($_POST['media_ids']) ? array_map('intval', $_POST['media_ids']) : [];
     $deleted_count = 0;
+
     foreach ($ids as $id) {
         if (!$whitelist->is_whitelisted($id)) {
+            // Usamos update directo para forzar papelera
             if ($wpdb->update($wpdb->posts, ['post_status' => 'trash'], ['ID' => $id])) {
                 clean_post_cache($id);
                 $deleted_count++;
@@ -32,13 +34,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['do_delete'])) {
             }
         }
     }
-    if ($deleted_count) echo '<div class="notice notice-success is-dismissible"><p>' . $deleted_count . ' archivos movidos a la papelera.</p></div>';
+
+    if ($deleted_count) {
+        // 🚀 CRÍTICO: Borrar caché del Dashboard para que se actualice al instante
+        delete_transient('maw_dashboard_stats_v25');
+        
+        echo '<div class="notice notice-success is-dismissible"><p>' . $deleted_count . ' archivos movidos a la papelera.</p></div>';
+    }
 }
 
 // --- QUERY ---
 $sql_base = "SELECT ID, post_title, post_mime_type, post_date FROM {$wpdb->posts} WHERE post_type = 'attachment' AND post_status = 'inherit'";
 
-// Aplicar Filtros SQL
+// Filtros SQL
 if ($filter_mime) {
     if ($filter_mime == 'video') $sql_base .= " AND post_mime_type LIKE 'video/%'";
     else $sql_base .= $wpdb->prepare(" AND post_mime_type LIKE %s", $filter_mime . '%');
@@ -56,7 +64,9 @@ $images_raw = $wpdb->get_results($sql_base . $wpdb->prepare(" ORDER BY ID DESC L
 
 <div class="maw-wrap">
     <div class="maw-header">
-        <div class="maw-title"><h1><span class="dashicons dashicons-filter"></span> Escáner Inteligente</h1></div>
+        <div class="maw-title">
+            <h1><span class="dashicons dashicons-filter"></span> Escáner Inteligente</h1>
+        </div>
         <div class="maw-badge">Resultados: <?php echo $total_items; ?></div>
     </div>
 
@@ -65,7 +75,7 @@ $images_raw = $wpdb->get_results($sql_base . $wpdb->prepare(" ORDER BY ID DESC L
         <input type="hidden" name="view" id="input_view_mode" value="<?php echo esc_attr($view_mode); ?>">
 
         <div class="maw-toolbar">
-            <!-- GRUPO 1: Tipos y Origen -->
+            <!-- GRUPO 1: Filtros Principales -->
             <div class="maw-filters-group">
                 <select name="ftype" onchange="this.form.submit()">
                     <option value="">Todos los Tipos</option>
@@ -76,21 +86,27 @@ $images_raw = $wpdb->get_results($sql_base . $wpdb->prepare(" ORDER BY ID DESC L
                 </select>
 
                 <select name="fsource" onchange="this.form.submit()" style="border-color:var(--maw-primary);">
-                    <option value="">Cualquier Uso</option>
+                    <option value="">Todos los Estados</option>
                     <option value="woo" <?php selected($filter_source, 'woo'); ?>>WooCommerce</option>
                     <option value="unused" <?php selected($filter_source, 'unused'); ?>>Solo Huérfanos</option>
                 </select>
             </div>
             
-            <!-- GRUPO 2: Fechas (NUEVO) -->
+            <!-- GRUPO 2: Fechas Branding -->
             <div class="maw-filters-group">
-                <input type="date" name="dstart" value="<?php echo esc_attr($date_start); ?>" class="maw-date-input" placeholder="Desde" title="Fecha Inicio">
+                <input type="date" name="dstart" value="<?php echo esc_attr($date_start); ?>" class="maw-date-input" title="Fecha Inicio">
                 <span style="color:#ccc">-</span>
-                <input type="date" name="dend" value="<?php echo esc_attr($date_end); ?>" class="maw-date-input" placeholder="Hasta" title="Fecha Fin">
+                <input type="date" name="dend" value="<?php echo esc_attr($date_end); ?>" class="maw-date-input" title="Fecha Fin">
+                
                 <button type="submit" class="button button-secondary">Filtrar</button>
+                
+                <!-- BOTÓN RESET NUEVO -->
+                <a href="admin.php?page=image-cleaner-filters" class="button" title="Limpiar Filtros / Recargar">
+                    <span class="dashicons dashicons-image-rotate" style="margin-top:4px;"></span>
+                </a>
             </div>
 
-            <!-- GRUPO 3: Vistas y Límite -->
+            <!-- GRUPO 3: Vistas -->
             <div class="maw-filters-group">
                 <select name="limit" onchange="this.form.submit()">
                     <option value="20" <?php selected($per_page, 20); ?>>20</option>
@@ -116,7 +132,7 @@ $images_raw = $wpdb->get_results($sql_base . $wpdb->prepare(" ORDER BY ID DESC L
                         <th width="30"><input type="checkbox" id="cb-select-all-1"></th>
                         <th width="60">Vista</th>
                         <th>Archivo</th>
-                        <th>Subido el</th> <!-- NUEVA COLUMNA -->
+                        <th>Subido el</th>
                         <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
@@ -132,13 +148,14 @@ $images_raw = $wpdb->get_results($sql_base . $wpdb->prepare(" ORDER BY ID DESC L
                         $file_path = get_attached_file($img->ID);
                         $size = file_exists($file_path) ? size_format(filesize($file_path)) : '-';
                         
-                        // Icono video
                         $is_video = strpos($img->post_mime_type, 'video') !== false;
                         $preview = $thumb ? '<img src="'.esc_url($thumb[0]).'" class="maw-img-preview">' : ($is_video ? '<div class="maw-img-preview" style="display:flex;justify-content:center;align-items:center;"><span class="dashicons dashicons-video-alt3"></span></div>' : '<div class="maw-img-preview"></div>');
 
                         $badge_html = '<span class="status-badge unused">SIN USO</span>';
                         if ($is_protected) $badge_html = '<span class="status-badge protected">PROTEGIDO</span>';
-                        elseif ($usage['found']) $badge_html = '<span class="status-badge in-use">EN USO</span>';
+                        elseif ($usage['found']) {
+                             $badge_html = ($usage['source'] === 'woo') ? '<span class="status-badge woo">WOOCOMMERCE</span>' : '<span class="status-badge in-use">EN USO</span>';
+                        }
                     ?>
                     <tr>
                         <td><input type="checkbox" name="media_ids[]" value="<?php echo $img->ID; ?>"></td>
@@ -147,7 +164,6 @@ $images_raw = $wpdb->get_results($sql_base . $wpdb->prepare(" ORDER BY ID DESC L
                             <strong><?php echo esc_html($img->post_title); ?></strong><br>
                             <small style="color:#888"><?php echo esc_html(basename($file_path)); ?> - <strong><?php echo $size; ?></strong></small>
                         </td>
-                        <!-- COLUMNA FECHA -->
                         <td style="font-size:12px; color:#666;">
                             <?php echo date('d/m/Y', strtotime($img->post_date)); ?><br>
                             <small><?php echo human_time_diff(strtotime($img->post_date), current_time('timestamp')) . ' atrás'; ?></small>
@@ -156,8 +172,7 @@ $images_raw = $wpdb->get_results($sql_base . $wpdb->prepare(" ORDER BY ID DESC L
                             <?php echo $badge_html; ?>
                             <?php if($usage['found']): ?>
                                 <div style="margin-top:6px;">
-                                    <!-- LINK ESTILIZADO -->
-                                    <a href="<?php echo $usage['locations'][0]['link']; ?>" target="_blank" class="maw-btn-view" title="Ver donde se usa">
+                                    <a href="<?php echo $usage['locations'][0]['link']; ?>" target="_blank" class="maw-btn-view">
                                         <span class="dashicons dashicons-external"></span> Ver uso
                                     </a>
                                 </div>
@@ -170,16 +185,15 @@ $images_raw = $wpdb->get_results($sql_base . $wpdb->prepare(" ORDER BY ID DESC L
                         </td>
                     </tr>
                     <?php endforeach; else: ?>
-                        <tr><td colspan="6" style="text-align:center; padding:30px;">No se encontraron archivos.</td></tr>
+                        <tr><td colspan="6" style="text-align:center; padding:30px;">No se encontraron archivos con estos criterios.</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
 
-        <!-- VISTA GRID -->
+        <!-- VISTA GRID (Simplificada) -->
         <div id="maw-grid-view" class="maw-grid" style="<?php echo $view_mode !== 'grid' ? 'display:none;' : ''; ?>">
             <?php if($images_raw): foreach($images_raw as $img): 
-                // ... Lógica de grid simplificada (misma que lista) ...
                 $usage = $scanner->scan_usage($img->ID);
                 if ($filter_source === 'woo' && $usage['source'] !== 'woo') continue;
                 if ($filter_source === 'unused' && $usage['found'] === true) continue;
@@ -197,7 +211,7 @@ $images_raw = $wpdb->get_results($sql_base . $wpdb->prepare(" ORDER BY ID DESC L
                     <span class="maw-grid-title"><?php echo esc_html($img->post_title); ?></span>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
                         <span class="status-badge <?php echo $cls; ?>"><?php echo $usage['found'] ? 'USO' : 'LIBRE'; ?></span>
-                        <small style="color:#888"><?php echo date('d/m/y', strtotime($img->post_date)); ?></small>
+                        <small><?php echo date('d/m/y', strtotime($img->post_date)); ?></small>
                     </div>
                 </div>
             </div>
@@ -207,7 +221,10 @@ $images_raw = $wpdb->get_results($sql_base . $wpdb->prepare(" ORDER BY ID DESC L
         <div class="maw-toolbar" style="margin-top:20px;">
             <button type="submit" name="do_delete" class="button button-primary button-large">Mover a Papelera</button>
             <div class="tablenav-pages">
-                <?php for($i=1; $i<=min(5, ceil($total_items/$per_page)); $i++) echo '<a href="'.add_query_arg(['paged'=>$i]).'" class="button">'.$i.'</a> '; ?>
+                <?php 
+                $total_pages = ceil($total_items / $per_page);
+                for($i=1; $i<=min(5, $total_pages); $i++) echo '<a href="'.add_query_arg(['paged'=>$i]).'" class="button">'.$i.'</a> ';
+                ?>
             </div>
         </div>
     </form>
