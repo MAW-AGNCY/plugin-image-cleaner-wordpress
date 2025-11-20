@@ -1,77 +1,83 @@
-# 🛡️ MAW Image Cleaner Pro
+# MAW Image Cleaner Pro - WordPress Media Optimization Suite
 
-![Version](https://img.shields.io/badge/version-2.0.0-blue?style=flat-square)
-![WordPress](https://img.shields.io/badge/WordPress-6.0%2B-success?style=flat-square)
-![PHP](https://img.shields.io/badge/PHP-7.4%2B-purple?style=flat-square)
-![License](https://img.shields.io/badge/license-Proprietary-red?style=flat-square)
+![Version](https://img.shields.io/badge/version-2.2.0-a81010?style=flat-square)
+![WordPress](https://img.shields.io/badge/WordPress-6.0%2B-444444?style=flat-square)
+![PHP](https://img.shields.io/badge/PHP-7.4%2B-444444?style=flat-square)
+![License](https://img.shields.io/badge/license-Proprietary-a81010?style=flat-square)
 
-> **La Suite definitiva de optimización de medios para WordPress.**  
-> Desarrollado por [Mondays at Work](https://www.mondaysatwork.com).
+> **La solución definitiva para auditar, limpiar y optimizar bibliotecas de medios en ecosistemas complejos (WooCommerce, Elementor, Divi).**
 
-MAW Image Cleaner Pro no es un simple limpiador. Es una herramienta de auditoría forense para tu biblioteca de medios, diseñada para trabajar con ecosistemas complejos como **WooCommerce, Elementor y Divi**.
-
----
-
-## ✨ Características Premium (v2.0.0)
-
-### 🧠 Escáner "Deep Scan"
-A diferencia de otros plugins que solo miran la "Imagen Destacada", nuestro motor `MAW_Scanner` analiza:
-*   **Contenido HTML:** Búsqueda por Regex de nombres de archivo.
-*   **WooCommerce:** Detección nativa de `_product_image_gallery`.
-*   **Page Builders:** Decodificación de JSON de Elementor y Shortcodes de Divi.
-
-### 🎨 Interfaz Visual (UI/UX)
-*   **Vista Grid:** Visualiza tus imágenes como en la biblioteca nativa.
-*   **Badges de Estado:** Identifica rápidamente qué está `EN USO`, `SIN USO` o `PROTEGIDO`.
-*   **Modo Protección (Whitelist):** Bloquea imágenes corporativas (Logos, Favicons) para evitar errores humanos.
-
-### 🛡️ Seguridad y Auditoría
-*   **Papelera Segura:** Los archivos nunca se borran directamente (Soft Delete).
-*   **Logs de Auditoría:** Registro inmutable de quién borró qué y cuándo.
-*   **Alertas HTML:** Notificaciones por email con diseño profesional.
+Desarrollado por **[Mondays at Work](https://www.mondaysatwork.com)**.
 
 ---
 
-## 🚀 Instalación
+## 🚀 Características Premium
+
+### 🧠 Escáner Inteligente (Deep Scan)
+A diferencia de los plugins convencionales, nuestro motor detecta el uso de imágenes en:
+*   **WooCommerce:** Galerías de producto y variaciones.
+*   **Page Builders:** Datos JSON de Elementor y Shortcodes de Divi.
+*   **Metadatos:** Campos ACF y configuraciones de tema.
+
+### 🛡️ Sistema de Seguridad
+*   **Papelera Forzada (SQL Direct):** Evita el borrado permanente accidental, incluso si WordPress tiene la papelera desactivada.
+*   **Whitelist (Protección):** Permite bloquear imágenes corporativas (Logos, Favicons) para que nunca sean sugeridas para borrado.
+*   **Auditoría Forense (Logs):** Registro inmutable de todas las acciones realizadas (borrado, recuperación) con fecha y usuario responsable.
+
+### 🎨 Interfaz Corporativa (MAW UI)
+*   Diseño limpio y coherente con la identidad de **Mondays at Work**.
+*   Vistas conmutables: Lista detallada (con peso y tipo) o Cuadrícula visual.
+*   Gráficos de uso de almacenamiento en tiempo real.
+
+### 📧 Notificaciones HTML
+*   Plantillas de correo electrónico profesionales y responsive.
+*   Alertas automáticas sobre el estado de la biblioteca.
+
+---
+
+## 🛠️ Instalación
 
 1.  Descarga el archivo `.zip` de la última Release.
-2.  Sube el plugin a `/wp-content/plugins/`.
-3.  Activa el plugin desde el panel de WordPress.
-4.  Ve a **MAW Cleaner** en el menú lateral.
+2.  Sube el plugin a través de `Plugins > Añadir nuevo > Subir plugin` en WordPress.
+3.  Activa el plugin.
+4.  Navega a **MAW Cleaner** en el menú lateral.
 
 ---
 
-## 📖 Guía Rápida
+## 📖 Guía de Uso
 
 ### 1. Escanear
-Ve a la pestaña **Escanear**. El sistema analizará automáticamente el uso de las imágenes mostradas.
-*   🟢 **Verde:** La imagen se usa en un Post/Producto. Se mostrará un enlace directo a donde se usa.
-*   🔴 **Rojo:** No se encontraron referencias. Candidata a borrar.
+Ve a la pestaña **Escanear**. El sistema marcará automáticamente el estado de cada imagen:
+*   🟢 **EN USO:** Encontrada en el contenido.
+*   🔴 **SIN USO:** Segura para borrar.
+*   🟣 **WOO:** En uso por WooCommerce.
 
-### 2. Limpiar
-Selecciona las imágenes marcadas en rojo. Haz clic en "Mover a Papelera".
-*   *Tip:* Si hay una imagen que no se usa pero quieres conservar, haz clic en **Bloquear**.
+### 2. Proteger (Whitelist)
+Si ves una imagen marcada como "Sin Uso" que deseas conservar (ej. un logo que solo usas en emails), haz clic en el botón **Bloquear**.
 
-### 3. Recuperar
-Si te equivocas, ve a la pestaña **Recuperación**. Allí encontrarás los archivos borrados listos para ser restaurados.
+### 3. Limpiar
+Selecciona las imágenes no deseadas y haz clic en **Mover a Papelera**.
+
+### 4. Recuperar
+¿Te equivocaste? Ve a la pestaña **Recuperación**, busca el archivo y haz clic en **Restaurar**.
 
 ---
 
-## 🏗️ Estructura del Proyecto
+## 📂 Estructura del Repositorio
 
 ```text
-/
-├── admin/                  # Vistas del Panel de Control (MVC)
-│   ├── filters-page.php    # Interfaz del Escáner
-│   ├── recovery-page.php   # Interfaz de Papelera
-│   ├── help-page.php       # Documentación interna
+plugin-image-cleaner/
+├── admin/                  # Vistas (MVC)
+│   ├── overview-page.php   # Dashboard
+│   ├── filters-page.php    # Escáner
 │   └── ...
-├── assets/
-│   └── css/maw-admin-ui.css # Estilos Premium
-├── includes/
-│   ├── class-maw-scanner.php # Motor de análisis (Core Logic)
-│   ├── class-maw-email.php   # Gestor de correos HTML
-│   ├── class-logger.php      # Sistema de auditoría
+├── assets/                 # Recursos Estáticos
+│   ├── css/maw-admin-ui.css # Estilos Corporativos
+│   └── js/maw-admin.js     # Lógica JS
+├── includes/               # Lógica de Negocio
+│   ├── class-maw-scanner.php       # Motor de Análisis
+│   ├── class-maw-email-manager.php # Sistema de Emails
 │   └── ...
-├── templates/              # Plantillas HTML para emails
-└── image-cleaner.php       # Bootstrap del plugin
+├── templates/              # Plantillas HTML
+│   └── emails/             # Emails Corporativos
+└── image-cleaner.php       # Bootstrap
