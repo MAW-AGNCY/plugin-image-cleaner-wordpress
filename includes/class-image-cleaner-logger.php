@@ -25,7 +25,8 @@ class MAW_Image_Logger {
             action varchar(50) NOT NULL,
             image_name varchar(255) NOT NULL,
             details text,
-            PRIMARY KEY  (id)
+            PRIMARY KEY  (id),
+            KEY action (action)
         ) $charset;";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -44,62 +45,76 @@ class MAW_Image_Logger {
     }
 
     /**
-     * Renderiza la tabla con el NUEVO DISEÑO CSS Premium
+     * Obtener logs con filtros
      */
-    public function render_logs_table() {
+    public function get_logs($per_page = 20, $page = 1, $filter = '') {
         global $wpdb;
-        
-        // Verificar tabla
-        if($wpdb->get_var("SHOW TABLES LIKE '$this->table_name'") != $this->table_name) {
-            echo '<div class="notice notice-warning"><p>Tabla de logs no encontrada. Reactiva el plugin.</p></div>';
-            return;
-        }
-
-        // Paginación
-        $per_page = 20;
-        $page = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
         $offset = ($page - 1) * $per_page;
-
-        $logs = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$this->table_name} ORDER BY time DESC LIMIT %d OFFSET %d", $per_page, $offset));
-        $total = $wpdb->get_var("SELECT COUNT(*) FROM {$this->table_name}");
-        $pages = ceil($total / $per_page);
-
-        if (empty($logs)) {
-            echo '<p style="padding:20px; text-align:center; color:#888;">No hay actividad registrada aún.</p>';
-            return;
-        }
-
-        // --- TABLA CON DISEÑO MAW-ADMIN-UI --- //
-        echo '<table class="maw-table-view">';
-        echo '<thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Archivo</th><th>Detalles</th></tr></thead>';
-        echo '<tbody>';
         
-        foreach ($logs as $log) {
-            $user = get_userdata($log->user_id);
-            $username = $user ? $user->user_login : 'System';
-            
-            // Badges de acción
-            $badge_class = ($log->action === 'deleted') ? 'unused' : (($log->action === 'recovered') ? 'in-use' : 'protected');
-            $badge_label = ucfirst($log->action);
+        $sql = "SELECT * FROM {$this->table_name}";
+        $args = [];
 
-            echo '<tr>';
-            echo '<td>' . esc_html($log->time) . '</td>';
-            echo '<td>' . esc_html($username) . '</td>';
-            echo '<td><span class="status-badge ' . $badge_class . '">' . esc_html($badge_label) . '</span></td>';
-            echo '<td><strong>' . esc_html($log->image_name) . '</strong></td>';
-            echo '<td style="color:#666;">' . esc_html($log->details) . '</td>';
-            echo '</tr>';
+        if ($filter) {
+            $sql .= " WHERE action = %s";
+            $args[] = $filter;
         }
-        echo '</tbody></table>';
 
-        // Paginación
-        if ($pages > 1) {
-            echo '<div class="tablenav bottom"><div class="tablenav-pages">';
-            for ($i = 1; $i <= min(10, $pages); $i++) {
-                $active = ($page == $i) ? 'button-primary' : 'button-secondary';
-                echo '<a href="' . add_query_arg('paged', $i) . '" class="button ' . $active . '">' . $i . '</a> ';
-            }
-            echo '</div></div>';
+        $sql .= " ORDER BY time DESC LIMIT %d OFFSET %d";
+        $args[] = $per_page;
+        $args[] = $offset;
+
+        return $wpdb->get_results($wpdb->prepare($sql, $args));
+    }
+
+    /**
+     * Contar logs con filtros
+     */
+    public function get_total_logs($filter = '') {
+        global $wpdb;
+        $sql = "SELECT COUNT(*) FROM {$this->table_name}";
+        if ($filter) {
+            return $wpdb->get_var($wpdb->prepare($sql . " WHERE action = %s", $filter));
         }
+        return $wpdb->get_var($sql);
+    }
+
+    /**
+     * Obtener estadísticas rápidas para el dashboard de reportes
+     */
+    public function get_stats() {
+        global $wpdb;
+        // Verificar si la tabla existe primero
+        if($wpdb->get_var("SHOW TABLES LIKE '$this->table_name'") != $this->table_name) return [];
+
+        return $wpdb->get_results("SELECT action, COUNT(*) as count FROM {$this->table_name} GROUP BY action");
+    }
+
+    /**
+     * Exportar CSV directo al navegador
+     */
+    public function export_csv() {
+        global $wpdb;
+        $rows = $wpdb->get_results("SELECT time, user_id, action, image_name, details FROM {$this->table_name} ORDER BY time DESC", ARRAY_A);
+
+        if (empty($rows)) return;
+
+        $filename = 'maw-audit-log-' . date('Y-m-d') . '.csv';
+        
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=' . $filename);
+        
+        $output = fopen('php://output', 'w');
+        
+        // Cabeceras CSV
+        fputcsv($output, ['Fecha', 'Usuario', 'Acción', 'Archivo', 'Detalles']);
+
+        foreach ($rows as $row) {
+            $user = get_userdata($row['user_id']);
+            $row['user_id'] = $user ? $user->user_login : 'System'; // Reemplazar ID por nombre
+            fputcsv($output, $row);
+        }
+        
+        fclose($output);
+        exit;
     }
 }
