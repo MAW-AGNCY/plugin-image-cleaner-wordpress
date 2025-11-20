@@ -1,6 +1,6 @@
 <?php
 if (!defined('ABSPATH')) {
-    exit; // Exit if accessed directly
+    exit; 
 }
 
 class Image_Cleaner_Admin {
@@ -8,59 +8,67 @@ class Image_Cleaner_Admin {
         $this->add_admin_hooks();
     }
 
-    /**
-     * Add hooks for the admin panel.
-     */
     private function add_admin_hooks() {
-        if (!has_action('admin_menu', [$this, 'register_admin_menu'])) {
-            add_action('admin_menu', [$this, 'register_admin_menu']);
-        }
+        add_action('admin_menu', [$this, 'register_admin_menu']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_scripts']);
     }
 
-    /**
-     * Register admin menu pages.
-     */
     public function register_admin_menu() {
+        // Menú Principal (Dashboard)
         add_menu_page(
-            __('Image Cleaner', 'image-cleaner'),
-            __('Image Cleaner', 'image-cleaner'),
+            __('MAW Cleaner', 'image-cleaner'),
+            __('MAW Cleaner', 'image-cleaner'),
             'manage_options',
             'image-cleaner-overview',
             [$this, 'render_overview_page'],
-            'dashicons-admin-media'
+            'dashicons-performance',
+            80
         );
 
+        // Submenú: Dashboard (Repetido para que sea la primera opción)
         add_submenu_page(
             'image-cleaner-overview',
-            __('Filters', 'image-cleaner'),
-            __('Filters', 'image-cleaner'),
+            __('Dashboard', 'image-cleaner'),
+            __('Dashboard', 'image-cleaner'),
+            'manage_options',
+            'image-cleaner-overview',
+            [$this, 'render_overview_page']
+        );
+
+        // Submenú: Filtros y Limpieza
+        add_submenu_page(
+            'image-cleaner-overview',
+            __('Escanear y Limpiar', 'image-cleaner'),
+            __('Escanear', 'image-cleaner'),
             'manage_options',
             'image-cleaner-filters',
             [$this, 'render_filters_page']
         );
 
+        // Submenú: Reportes (Auditoría)
         add_submenu_page(
             'image-cleaner-overview',
-            __('Reports', 'image-cleaner'),
-            __('Reports', 'image-cleaner'),
+            __('Reportes y Auditoría', 'image-cleaner'),
+            __('Reportes', 'image-cleaner'),
             'manage_options',
             'image-cleaner-reports',
             [$this, 'render_reports_page']
         );
 
+        // Submenú: Recuperación
         add_submenu_page(
             'image-cleaner-overview',
-            __('Recovery', 'image-cleaner'),
-            __('Recovery', 'image-cleaner'),
+            __('Papelera / Recuperación', 'image-cleaner'),
+            __('Recuperación', 'image-cleaner'),
             'manage_options',
             'image-cleaner-recovery',
             [$this, 'render_recovery_page']
         );
 
+        // Submenú: Configuración Email
         add_submenu_page(
             'image-cleaner-overview',
-            __('Emails', 'image-cleaner'),
+            __('Notificaciones', 'image-cleaner'),
             __('Emails', 'image-cleaner'),
             'manage_options',
             'image-cleaner-emails',
@@ -68,87 +76,52 @@ class Image_Cleaner_Admin {
         );
     }
 
-    /**
-     * Enqueue admin scripts and styles.
-     */
     public function enqueue_admin_scripts($hook) {
-        if (strpos($hook, 'image-cleaner') === false) {
-            return;
-        }
+        if (strpos($hook, 'image-cleaner') === false) return;
 
+        // Cargamos el CSS global de la interfaz
         wp_enqueue_style(
-            'image-cleaner-admin-style',
-            IMAGE_CLEANER_PLUGIN_URL . 'assets/css/image-cleaner-admin.css',
-            [],
-            '1.0.0'
+            'maw-admin-ui', 
+            IMAGE_CLEANER_PLUGIN_URL . 'assets/css/maw-admin-ui.css', 
+            [], 
+            '1.2.0'
         );
-
-        wp_enqueue_script(
-            'image-cleaner-admin-script',
-            IMAGE_CLEANER_PLUGIN_URL . 'assets/js/image-cleaner-admin.js',
-            ['jquery'],
-            '1.0.0',
-            true
-        );
+        
+        // Scripts generales si son necesarios
+        wp_enqueue_script('jquery');
     }
 
-    /**
-     * Render the overview page.
-     */
+    // --- Funciones de Renderizado --- //
+
     public function render_overview_page() {
-        $file = IMAGE_CLEANER_PLUGIN_DIR . 'admin/overview-page.php';
-        if (file_exists($file)) {
-            include $file;
-        } else {
-            echo '<div class="error"><p>' . esc_html__('Overview page file not found.', 'image-cleaner') . '</p></div>';
-        }
+        $this->load_view('overview-page.php');
     }
 
-    /**
-     * Render the filters page.
-     */
     public function render_filters_page() {
-        $file = IMAGE_CLEANER_PLUGIN_DIR . 'admin/filters-page.php';
-        if (file_exists($file)) {
-            include $file;
-        } else {
-            echo '<div class="error"><p>' . esc_html__('Filters page file not found.', 'image-cleaner') . '</p></div>';
-        }
+        $this->load_view('filters-page.php');
     }
 
-    /**
-     * Render the reports page.
-     */
     public function render_reports_page() {
-        $file = IMAGE_CLEANER_PLUGIN_DIR . 'admin/reports-page.php';
-        if (file_exists($file)) {
-            include $file;
-        } else {
-            echo '<div class="error"><p>' . esc_html__('Reports page file not found.', 'image-cleaner') . '</p></div>';
-        }
+        $this->load_view('reports-page.php');
     }
 
-    /**
-     * Render the recovery page.
-     */
     public function render_recovery_page() {
-        $file = IMAGE_CLEANER_PLUGIN_DIR . 'admin/recovery-page.php';
-        if (file_exists($file)) {
-            include $file;
-        } else {
-            echo '<div class="error"><p>' . esc_html__('Recovery page file not found.', 'image-cleaner') . '</p></div>';
-        }
+        $this->load_view('recovery-page.php');
+    }
+
+    public function render_emails_page() {
+        $this->load_view('email-page.php');
     }
 
     /**
-     * Render the emails page.
+     * Helper para cargar vistas de forma segura
      */
-    public function render_emails_page() {
-        $file = IMAGE_CLEANER_PLUGIN_DIR . 'admin/email-page.php';
+    private function load_view($filename) {
+        $file = IMAGE_CLEANER_PLUGIN_DIR . 'admin/' . $filename;
         if (file_exists($file)) {
             include $file;
         } else {
-            echo '<div class="error"><p>' . esc_html__('Emails page file not found.', 'image-cleaner') . '</p></div>';
+            echo '<div class="notice notice-error"><p>Error: No se encuentra el archivo de vista: ' . esc_html($filename) . '</p></div>';
         }
     }
 }
