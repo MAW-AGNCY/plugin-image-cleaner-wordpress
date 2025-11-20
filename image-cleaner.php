@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: MAW Image Cleaner Pro
- * Description: Suite profesional de optimización de medios. Auditoría, Limpieza, Recuperación y Whitelist. Integración nativa con Woo, Elementor y Divi.
- * Version: 2.0.1
+ * Description: Suite profesional de optimización de medios. Auditoría, Limpieza, Recuperación y Protección. Integración nativa con Woo, Elementor y Divi.
+ * Version: 2.1.0
  * Author: Mondays at Work
  * Author URI: https://www.mondaysatwork.com
  * Text Domain: image-cleaner
@@ -18,9 +18,9 @@ define('IMAGE_CLEANER_PLUGIN_URL', plugin_dir_url(__FILE__));
 // Carga de módulos del núcleo (Orden de dependencia importante)
 require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-image-cleaner-logger.php';
 require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-image-cleaner-whitelist.php';
-require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-maw-scanner.php'; // Motor de escaneo
+require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-maw-scanner.php';
 require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-maw-email-manager.php';
-require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-image-cleaner-admin.php'; // <--- Aquí está el registro de menús
+require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-image-cleaner-admin.php';
 require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-image-cleaner-ajax.php';
 require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-image-cleaner-recovery.php';
 require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-image-cleaner-reports.php';
@@ -47,13 +47,12 @@ class Image_Cleaner_Pro {
 
         // Inicializar interfaz de administración
         if (is_admin()) {
-            // Esta clase es la que llama a register_admin_menu
             new Image_Cleaner_Admin();
-            new Image_Cleaner_Reports();
+            new Image_Cleaner_Reports(); // Solo lógica de datos
             new Image_Cleaner_Recovery();
         }
         
-        // Inicializar listeners AJAX (frontend/backend)
+        // Inicializar listeners AJAX
         new Image_Cleaner_Ajax();
     }
 
@@ -61,7 +60,7 @@ class Image_Cleaner_Pro {
         load_plugin_textdomain('image-cleaner', false, dirname(plugin_basename(__FILE__)) . '/languages');
     }
 
-    // Getters públicos para acceso global
+    // Getters públicos
     public function get_logger() { return $this->logger; }
     public function get_whitelist_manager() { return $this->whitelist_manager; }
 
@@ -79,6 +78,6 @@ class Image_Cleaner_Pro {
 // Arrancar el motor
 Image_Cleaner_Pro::get_instance();
 
-// Registrar hooks de instalación
+// Registrar hooks
 register_activation_hook(__FILE__, ['Image_Cleaner_Pro', 'activate']);
 register_deactivation_hook(__FILE__, ['Image_Cleaner_Pro', 'deactivate']);
