@@ -1,0 +1,53 @@
+:root {
+    --maw-primary: #0073aa;
+    --maw-success: #00a32a;
+    --maw-warning: #dba617;
+    --maw-danger: #d63638;
+    --maw-bg: #f0f0f1;
+    --maw-card-bg: #ffffff;
+}
+
+.maw-dashboard-wrapper {
+    margin: 20px 20px 0 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+/* Header */
+.maw-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+.maw-logo { font-size: 1.8em; font-weight: 700; color: #23282d; display: flex; align-items: center; gap: 10px; }
+.maw-badge { font-size: 0.5em; background: var(--maw-primary); color: white; padding: 2px 8px; border-radius: 10px; vertical-align: middle; }
+
+/* Stats Cards Grid */
+.maw-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.maw-card {
+    background: var(--maw-card-bg);
+    border: 1px solid #ccd0d4;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+}
+.maw-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
+.maw-stat-label { color: #646970; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block;}
+.maw-stat-number { font-size: 2.2em; font-weight: 700; color: #1d2327; line-height: 1.1; }
+.maw-stat-desc { font-size: 0.85em; color: #a7aaad; margin-top: 5px; }
+
+/* Quick Actions */
+.maw-actions-row { display: flex; gap: 10px; margin-bottom: 30px; }
+.maw-btn-lg { padding: 12px 24px; font-size: 1.1em; height: auto; display: inline-flex; align-items: center; gap: 8px; }
+
+/* Charts / Modules placeholder */
+.maw-module { background: white; padding: 20px; border-radius: 8px; border: 1px solid #ccd0d4; margin-bottom: 20px; }
+.maw-module h3 { margin-top: 0; border-bottom: 1px solid #f0f0f1; padding-bottom: 15px; }
