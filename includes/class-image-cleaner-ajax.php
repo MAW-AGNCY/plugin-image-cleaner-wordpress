@@ -1,43 +1,47 @@
 <?php
-if (!defined('ABSPATH')) {
-    exit; // Exit if accessed directly
-}
+if (!defined('ABSPATH')) { exit; }
 
 class Image_Cleaner_Ajax {
+
     public function __construct() {
-        add_action('wp_ajax_image_cleaner_filter_images', [$this, 'filter_images']);
-        add_action('wp_ajax_image_cleaner_generate_report', [$this, 'generate_report']);
+        // Registrar acciones AJAX para usuarios logueados
+        add_action('wp_ajax_maw_toggle_whitelist', [$this, 'handle_whitelist_toggle']);
     }
 
     /**
-     * Handle AJAX request to filter images.
+     * Maneja el bloqueo/desbloqueo de imágenes desde los botones pequeños
      */
-    public function filter_images() {
-        check_ajax_referer('image_cleaner_nonce', 'security');
+    public function handle_whitelist_toggle() {
+        // 1. Verificar Permisos
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Permisos denegados']);
+        }
 
-        $filters = [
-            'type' => sanitize_text_field($_POST['filter_type'] ?? 'all'),
-            'size' => intval($_POST['filter_size'] ?? 0),
-            'date' => sanitize_text_field($_POST['filter_date'] ?? ''),
-            'status' => sanitize_text_field($_POST['filter_status'] ?? 'all'),
-        ];
+        // 2. Obtener datos
+        $image_id = isset($_POST['image_id']) ? intval($_POST['image_id']) : 0;
+        
+        if (!$image_id) {
+            wp_send_json_error(['message' => 'ID inválido']);
+        }
 
-        // Simulate filtered results (replace with actual logic)
-        wp_send_json_success([
-            'message' => __('Images filtered successfully.', 'image-cleaner'),
-            'data' => $filters,
-        ]);
-    }
+        // 3. Instanciar Manager
+        $whitelist_manager = Image_Cleaner_Pro::get_instance()->get_whitelist_manager();
+        $current_list = $whitelist_manager->get_whitelist();
 
-    /**
-     * Handle AJAX request to generate a report.
-     */
-    public function generate_report() {
-        check_ajax_referer('image_cleaner_nonce', 'security');
+        // 4. Lógica Toggle (Si existe quita, si no existe añade)
+        if (in_array($image_id, $current_list)) {
+            $new_list = array_diff($current_list, [$image_id]);
+            $status = 'removed';
+        } else {
+            $current_list[] = $image_id;
+            $new_list = $current_list;
+            $status = 'added';
+        }
 
-        // Simulate report generation (replace with actual logic)
-        wp_send_json_success([
-            'message' => __('Report generated successfully.', 'image-cleaner'),
-        ]);
+        // 5. Guardar
+        update_option('maw_image_cleaner_whitelist', array_values($new_list));
+
+        // 6. Respuesta JSON
+        wp_send_json_success(['status' => $status, 'id' => $image_id]);
     }
 }
