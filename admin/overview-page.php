@@ -3,82 +3,104 @@ if (!defined('ABSPATH')) exit;
 
 global $wpdb;
 
-// --- LÓGICA DE DATOS (CON CACHÉ) ---
+// --- LÓGICA DE CÁLCULO DE DATOS (CON CACHÉ) ---
 
-// 1. Verificar si se solicita recálculo forzado
+// Forzar recálculo si el usuario pulsa el botón
 if (isset($_GET['recalc']) && $_GET['recalc'] == '1') {
-    delete_transient('maw_dashboard_stats');
+    delete_transient('maw_dashboard_stats_v25');
 }
 
-// 2. Intentar obtener datos de la caché (Transient) para rendimiento
-$stats = get_transient('maw_dashboard_stats');
+$stats = get_transient('maw_dashboard_stats_v25');
 
 if (false === $stats) {
-    // A. Contadores Básicos (Rápidos)
+    // 1. Conteos Básicos
     $total_files = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'attachment' AND post_status = 'inherit'");
     $trash_files = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'attachment' AND post_status = 'trash'");
     
-    // B. Huérfanos (Aproximación rápida: sin padre asignado)
-    // Nota: El escáner profundo en la otra pestaña es más preciso, esto es para estadísticas rápidas.
-    $orphan_count = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'attachment' AND post_status = 'inherit' AND post_parent = 0");
+    // 2. Análisis de Huérfanos (Aproximación Rápida)
+    // Buscamos archivos sin padre y que no sean thumbnails de nadie
+    $orphans_query = "
+        SELECT ID FROM $wpdb->posts p
+        WHERE p.post_type = 'attachment' 
+        AND p.post_status = 'inherit' 
+        AND p.post_parent = 0
+        AND NOT EXISTS (
+            SELECT * FROM $wpdb->postmeta pm 
+            WHERE pm.meta_key = '_thumbnail_id' 
+            AND pm.meta_value = p.ID
+        )
+        LIMIT 2000"; // Límite de seguridad para rendimiento
 
-    // C. Desglose por Tipos
-    $types = $wpdb->get_results("
-        SELECT post_mime_type, COUNT(*) as count 
-        FROM $wpdb->posts 
-        WHERE post_type = 'attachment' AND post_status = 'inherit' 
-        GROUP BY post_mime_type 
-        ORDER BY count DESC 
-        LIMIT 5
-    ");
-
-    // D. Cálculo de Peso Total (Pesado - Iterativo)
-    // Limitamos a 5000 para evitar timeout en servidores compartidos si no es background process
-    $all_attachments = $wpdb->get_col("SELECT ID FROM $wpdb->posts WHERE post_type = 'attachment' AND post_status = 'inherit' LIMIT 5000");
-    $total_size = 0;
-    foreach ($all_attachments as $id) {
-        $file_path = get_attached_file($id);
-        if (file_exists($file_path)) {
-            $total_size += filesize($file_path);
+    $orphan_ids = $wpdb->get_col($orphans_query);
+    $orphan_count = count($orphan_ids);
+    
+    // 3. Cálculo de Pesos (Iterativo)
+    // Nota: Esto puede ser pesado en sitios gigantes, por eso usamos Transients y un límite
+    $total_library_size = 0;
+    $recoverable_size = 0;
+    
+    // A. Peso Recuperable (De los huérfanos detectados)
+    foreach ($orphan_ids as $oid) {
+        $path = get_attached_file($oid);
+        if (file_exists($path)) {
+            $recoverable_size += filesize($path);
         }
     }
 
-    // Guardar en array
+    // B. Peso Total Librería (Muestreo de los últimos 1000 para estimar o cálculo real si son pocos)
+    // Para ser exactos sin colgar el servidor, sumamos meta '_wp_attached_file' size si existe, 
+    // o hacemos un cálculo aproximado. Aquí hacemos un cálculo real sobre los IDs obtenidos.
+    // En una versión Enterprise real, esto se haría en background.
+    // Aquí obtenemos una muestra representativa para no colgar PHP.
+    $all_ids = $wpdb->get_col("SELECT ID FROM $wpdb->posts WHERE post_type = 'attachment' AND post_status = 'inherit' LIMIT 5000");
+    foreach ($all_ids as $aid) {
+        $path = get_attached_file($aid);
+        if (file_exists($path)) {
+            $total_library_size += filesize($path);
+        }
+    }
+    // Si hay más de 5000, hacemos una proyección simple
+    if ($total_files > 5000) {
+        $avg_size = $total_library_size / 5000;
+        $total_library_size = $avg_size * $total_files;
+    }
+
+    // 4. Desglose por Tipos
+    $types = $wpdb->get_results("SELECT post_mime_type, COUNT(*) as count FROM $wpdb->posts WHERE post_type = 'attachment' AND post_status = 'inherit' GROUP BY post_mime_type ORDER BY count DESC LIMIT 5");
+
     $stats = [
         'total' => $total_files,
         'trash' => $trash_files,
         'orphans' => $orphan_count,
+        'total_size' => $total_library_size,
+        'savings' => $recoverable_size,
         'types' => $types,
-        'size' => $total_size,
         'timestamp' => current_time('mysql')
     ];
-
-    // Guardar caché por 12 horas
-    set_transient('maw_dashboard_stats', $stats, 12 * HOUR_IN_SECONDS);
+    
+    set_transient('maw_dashboard_stats_v25', $stats, 12 * HOUR_IN_SECONDS);
 }
 
-// Formateo para vista
-$formatted_size = size_format($stats['size']);
-$orphan_percent = ($stats['total'] > 0) ? round(($stats['orphans'] / $stats['total']) * 100) : 0;
-
-// Mensaje de advertencia si hay mucho en papelera
-$trash_warning = ($stats['trash'] > 0) ? true : false;
+// Formateo visual
+$formatted_total_size = size_format($stats['total_size']);
+$formatted_savings = size_format($stats['savings']);
+$trash_warning = ($stats['trash'] > 0);
 ?>
 
 <div class="maw-wrap">
     <!-- Header -->
     <div class="maw-header">
         <div class="maw-title">
-            <h1><span class="dashicons dashicons-dashboard"></span> Visión General <span class="maw-badge">Premium</span></h1>
+            <h1><span class="dashicons dashicons-dashboard"></span> Dashboard <span class="maw-badge">Enterprise</span></h1>
         </div>
         <div>
-            <span style="color:#888; font-size:12px; margin-right:10px;">Última actualización: <?php echo date('H:i', strtotime($stats['timestamp'])); ?></span>
-            <a href="admin.php?page=image-cleaner-overview&recalc=1" class="button button-small"><span class="dashicons dashicons-update"></span> Recalcular</a>
+            <span style="color:#888; font-size:12px; margin-right:10px;">Datos: <?php echo date('H:i d/m', strtotime($stats['timestamp'])); ?></span>
+            <a href="admin.php?page=image-cleaner-overview&recalc=1" class="button button-small"><span class="dashicons dashicons-update"></span> Actualizar Datos</a>
         </div>
     </div>
 
-    <!-- 1. Fila de Métricas Principales -->
-    <div class="maw-metrics-row">
+    <!-- 1. FILA DE MÉTRICAS (4 COLUMNAS) -->
+    <div class="maw-metrics-row" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
         
         <!-- Total Archivos -->
         <div class="maw-metric-card">
@@ -98,29 +120,31 @@ $trash_warning = ($stats['trash'] > 0) ? true : false;
             </div>
             <div class="maw-metric-data">
                 <h4>Peso Librería</h4>
-                <div class="value"><?php echo $formatted_size; ?></div>
+                <div class="value"><?php echo $formatted_total_size; ?></div>
             </div>
         </div>
 
-        <!-- Huérfanos -->
-        <div class="maw-metric-card">
-            <div class="maw-metric-icon danger">
-                <span class="dashicons dashicons-warning"></span>
+        <!-- Espacio Recuperable -->
+        <div class="maw-metric-card maw-saving-card">
+            <div class="maw-metric-icon" style="background:#eef9ef; color:var(--maw-success);">
+                <span class="dashicons dashicons-chart-line"></span>
             </div>
             <div class="maw-metric-data">
-                <h4>Posibles Huérfanos</h4>
-                <div class="value"><?php echo number_format_i18n($stats['orphans']); ?> <small style="font-size:12px; font-weight:normal; color:#888">(<?php echo $orphan_percent; ?>%)</small></div>
+                <h4>Recuperable</h4>
+                <div class="value maw-saving-value"><?php echo $formatted_savings; ?></div>
+                <div style="font-size:11px; color:#666;"><?php echo $stats['orphans']; ?> archivos huérfanos</div>
             </div>
         </div>
 
         <!-- Papelera -->
         <div class="maw-metric-card" style="<?php echo $trash_warning ? 'border-color:var(--maw-danger);' : ''; ?>">
-            <div class="maw-metric-icon">
+            <div class="maw-metric-icon danger">
                 <span class="dashicons dashicons-trash"></span>
             </div>
             <div class="maw-metric-data">
-                <h4>En Papelera</h4>
+                <h4>Papelera</h4>
                 <div class="value"><?php echo number_format_i18n($stats['trash']); ?></div>
+                <div style="font-size:11px; color:#666;">Pendientes borrado</div>
             </div>
         </div>
 
@@ -128,80 +152,84 @@ $trash_warning = ($stats['trash'] > 0) ? true : false;
 
     <?php if($trash_warning): ?>
         <div class="maw-alert warning">
-            <p><strong>Atención:</strong> Tienes <strong><?php echo $stats['trash']; ?></strong> archivos en la papelera ocupando espacio. <a href="admin.php?page=image-cleaner-recovery">Revisar ahora</a>.</p>
+            <p><strong>Consejo de optimización:</strong> Tienes <strong><?php echo $stats['trash']; ?></strong> archivos en la papelera. Vacíala para liberar espacio real en el servidor. <a href="admin.php?page=image-cleaner-recovery">Ir a Papelera</a>.</p>
         </div>
     <?php endif; ?>
 
-    <!-- 2. Grid de Contenido (Detalles + Accesos) -->
+    <!-- 2. GRID DE CONTENIDO Y ACCIONES -->
     <div class="maw-content-grid">
         
-        <!-- Columna Izquierda: Desglose y Gráfica -->
+        <!-- Columna Izquierda: Desglose -->
         <div class="maw-card">
-            <h3><span class="dashicons dashicons-chart-pie"></span> Distribución por Tipo de Archivo</h3>
+            <h3><span class="dashicons dashicons-chart-pie"></span> Distribución por Tipo</h3>
             <div style="margin-top:20px;">
                 <?php if($stats['types']): foreach($stats['types'] as $type): 
                     $mime = $type->post_mime_type;
                     $count = $type->count;
+                    // Evitar división por cero
                     $percent_bar = ($stats['total'] > 0) ? ($count / $stats['total']) * 100 : 0;
                     
-                    // Clase color para barra
                     $bar_class = '';
                     if(strpos($mime, 'png') !== false) $bar_class = 'png';
                     if(strpos($mime, 'pdf') !== false) $bar_class = 'pdf';
                 ?>
                 <div class="maw-type-row">
-                    <div style="width:60px; font-weight:600; text-transform:uppercase;"><?php echo str_replace(['image/', 'application/'], '', $mime); ?></div>
+                    <div style="width:80px; font-weight:600; text-transform:uppercase; font-size:11px; color:#555;">
+                        <?php echo str_replace(['image/', 'application/'], '', $mime); ?>
+                    </div>
                     <div class="maw-type-bar-bg">
                         <div class="maw-type-bar-fill <?php echo $bar_class; ?>" style="width: <?php echo $percent_bar; ?>%;"></div>
                     </div>
-                    <div style="width:50px; text-align:right;"><?php echo number_format_i18n($count); ?></div>
+                    <div style="width:60px; text-align:right; font-weight:bold; color:#444;">
+                        <?php echo number_format_i18n($count); ?>
+                    </div>
                 </div>
                 <?php endforeach; else: ?>
-                    <p>No hay datos suficientes.</p>
+                    <p style="color:#999;">No hay datos suficientes para mostrar el desglose.</p>
                 <?php endif; ?>
             </div>
-            
-            <div style="margin-top:20px; padding-top:20px; border-top:1px dashed #eee; font-size:12px; color:#666;">
-                <p><span class="dashicons dashicons-info"></span> <em>Nota: El "Peso Librería" es una estimación basada en los archivos originales. El tamaño real en disco puede ser mayor debido a las miniaturas generadas por WordPress.</em></p>
+            <div style="margin-top:30px; padding-top:20px; border-top:1px dashed #eee;">
+                <p class="description">Este gráfico muestra qué tipo de archivos consumen más "slots" en tu base de datos media.</p>
             </div>
         </div>
 
         <!-- Columna Derecha: Accesos Rápidos -->
         <div>
-            <h3 style="margin-bottom:15px; color:#333;">Accesos Rápidos</h3>
+            <h3 style="margin-bottom:15px; color:#333;">Accesos Directos</h3>
             <div class="maw-actions-grid">
                 
                 <a href="admin.php?page=image-cleaner-filters" class="maw-action-btn">
                     <span class="dashicons dashicons-filter"></span>
                     <span class="maw-action-title">Escanear</span>
-                    <span class="maw-action-desc">Detectar y limpiar</span>
+                    <span class="maw-action-desc">Limpiar <?php echo $formatted_savings; ?></span>
                 </a>
 
                 <a href="admin.php?page=image-cleaner-recovery" class="maw-action-btn">
                     <span class="dashicons dashicons-undo"></span>
                     <span class="maw-action-title">Recuperar</span>
-                    <span class="maw-action-desc">Gestionar papelera</span>
+                    <span class="maw-action-desc">Gestión Papelera</span>
                 </a>
 
                 <a href="admin.php?page=image-cleaner-reports" class="maw-action-btn">
-                    <span class="dashicons dashicons-analytics"></span>
+                    <span class="dashicons dashicons-clipboard"></span>
                     <span class="maw-action-title">Logs</span>
-                    <span class="maw-action-desc">Auditoría forense</span>
+                    <span class="maw-action-desc">Ver auditoría</span>
                 </a>
 
                 <a href="admin.php?page=image-cleaner-emails" class="maw-action-btn">
-                    <span class="dashicons dashicons-email"></span>
+                    <span class="dashicons dashicons-email-alt"></span>
                     <span class="maw-action-title">Alertas</span>
-                    <span class="maw-action-desc">Configurar emails</span>
+                    <span class="maw-action-desc">Configurar avisos</span>
                 </a>
 
             </div>
-
+            
+            <!-- Estado del Sistema -->
             <div class="maw-card" style="margin-top:20px; background:#f9f9f9; border:none;">
-                <h3>Estado del Plugin</h3>
-                <ul style="margin:0; font-size:12px; line-height:1.8;">
-                    <li><strong>Versión:</strong> 2.2.0 Premium</li>
-                    <li><strong>Escáner:</strong> Activo (Woo/Elementor/Divi)</li>
+                <h4 style="margin:0 0 10px 0;">Estado del Sistema</h4>
+                <ul style="margin:0; font-size:12px; color:#666; line-height:1.6;">
+                    <li><strong>PHP Memory:</strong> <?php echo ini_get('memory_limit'); ?></li>
+                    <li><strong>Escáner:</strong> Deep Scan Activo</li>
                     <li><strong>Papelera WP:</strong> <?php echo (defined('EMPTY_TRASH_DAYS') && EMPTY_TRASH_DAYS==0) ? '<span style="color:red">Desactivada</span>' : '<span style="color:green">Protegida</span>'; ?></li>
                 </ul>
             </div>
