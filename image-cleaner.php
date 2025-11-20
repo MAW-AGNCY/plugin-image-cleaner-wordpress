@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: MAW Image Cleaner Pro
- * Description: Suite profesional de optimización de medios. Auditoría, Limpieza, Recuperación y Whitelist.
- * Version: 1.2.0
+ * Description: Suite profesional de optimización de medios. Auditoría, Limpieza, Recuperación y Whitelist. Integración nativa con Woo, Elementor y Divi.
+ * Version: 2.0.1
  * Author: Mondays at Work
  * Author URI: https://www.mondaysatwork.com
  * Text Domain: image-cleaner
@@ -11,20 +11,24 @@
 
 if (!defined('ABSPATH')) exit;
 
+// Definición de constantes de rutas
 define('IMAGE_CLEANER_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('IMAGE_CLEANER_PLUGIN_URL', plugin_dir_url(__FILE__));
 
-// Includes
+// Carga de módulos del núcleo (Orden de dependencia importante)
 require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-image-cleaner-logger.php';
 require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-image-cleaner-whitelist.php';
-require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-maw-email-manager.php'; // Nuevo sistema de email
-require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-image-cleaner-admin.php';
+require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-maw-scanner.php'; // Motor de escaneo
+require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-maw-email-manager.php';
+require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-image-cleaner-admin.php'; // <--- Aquí está el registro de menús
 require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-image-cleaner-ajax.php';
 require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-image-cleaner-recovery.php';
 require_once IMAGE_CLEANER_PLUGIN_DIR . 'includes/class-image-cleaner-reports.php';
 
 class Image_Cleaner_Pro {
     private static $instance;
+    
+    // Componentes globales accesibles vía Singleton
     public $logger;
     public $whitelist_manager;
 
@@ -37,18 +41,19 @@ class Image_Cleaner_Pro {
         // Cargar traducciones
         add_action('plugins_loaded', [$this, 'load_textdomain']);
         
-        // Inicializar Clases Globales
+        // Inicializar componentes lógicos
         $this->logger = new MAW_Image_Logger();
         $this->whitelist_manager = new MAW_Image_Whitelist();
 
+        // Inicializar interfaz de administración
         if (is_admin()) {
+            // Esta clase es la que llama a register_admin_menu
             new Image_Cleaner_Admin();
             new Image_Cleaner_Reports();
             new Image_Cleaner_Recovery();
-            
-            // Encolar CSS Global del Dashboard
-            add_action('admin_enqueue_scripts', [$this, 'enqueue_global_assets']);
         }
+        
+        // Inicializar listeners AJAX (frontend/backend)
         new Image_Cleaner_Ajax();
     }
 
@@ -56,26 +61,13 @@ class Image_Cleaner_Pro {
         load_plugin_textdomain('image-cleaner', false, dirname(plugin_basename(__FILE__)) . '/languages');
     }
 
-    public function enqueue_global_assets($hook) {
-        // Solo cargar en nuestras páginas
-        if (strpos($hook, 'image-cleaner') !== false) {
-            wp_enqueue_style(
-                'maw-admin-ui', 
-                IMAGE_CLEANER_PLUGIN_URL . 'assets/css/maw-admin-ui.css', 
-                [], 
-                '1.2.0'
-            );
-        }
-    }
-
-    // Getters públicos
+    // Getters públicos para acceso global
     public function get_logger() { return $this->logger; }
     public function get_whitelist_manager() { return $this->whitelist_manager; }
 
     public static function activate() {
         MAW_Image_Logger::create_table();
-        // Borrar transient al activar para forzar recálculo
-        delete_transient('maw_image_cleaner_stats'); 
+        delete_transient('maw_image_cleaner_stats');
         flush_rewrite_rules();
     }
 
@@ -84,6 +76,9 @@ class Image_Cleaner_Pro {
     }
 }
 
+// Arrancar el motor
 Image_Cleaner_Pro::get_instance();
+
+// Registrar hooks de instalación
 register_activation_hook(__FILE__, ['Image_Cleaner_Pro', 'activate']);
 register_deactivation_hook(__FILE__, ['Image_Cleaner_Pro', 'deactivate']);
