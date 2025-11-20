@@ -1,84 +1,134 @@
-<?php if (!defined('ABSPATH')) exit;
+<?php 
+if (!defined('ABSPATH')) exit; 
 
-// Lógica Restaurar
+/**
+ * LÓGICA DE RESTAURACIÓN
+ * ----------------------
+ * Procesa la solicitud POST para sacar un elemento de la papelera.
+ */
 if (isset($_POST['restore_id']) && check_admin_referer('maw_rest', 'maw_nonce')) {
     $id = intval($_POST['restore_id']);
+    
+    // Intentar restaurar
     if (wp_untrash_post($id)) {
-        echo '<div class="notice notice-success is-dismissible"><p>Imagen restaurada a la biblioteca.</p></div>';
+        // Registrar en auditoría
+        Image_Cleaner_Pro::get_instance()->get_logger()->log('recovered', 'ID: ' . $id, 'Restaurado desde Papelera');
+        echo '<div class="notice notice-success is-dismissible"><p><strong>Éxito:</strong> La imagen ha sido restaurada a la biblioteca.</p></div>';
     } else {
-        echo '<div class="notice notice-error"><p>Error al restaurar. Verifica permisos.</p></div>';
+        echo '<div class="notice notice-error is-dismissible"><p><strong>Error:</strong> No se pudo restaurar. Verifica si el archivo físico aún existe en /uploads/.</p></div>';
     }
 }
 
-// Query Específica: Forzar status trash
-$args = [
-    'post_type'      => 'attachment',
-    'post_status'    => 'trash', // CRUCIAL
-    'posts_per_page' => 50,
-    'orderby'        => 'modified',
-    'order'          => 'DESC'
-];
-$query = new WP_Query($args);
+/**
+ * CONSULTA DIRECTA A BASE DE DATOS (ROBUSTA)
+ * ------------------------------------------
+ * Usamos $wpdb en lugar de WP_Query para evitar que temas o plugins
+ * de terceros filtren u oculten los resultados de la papelera.
+ */
+global $wpdb;
+
+// Verificar configuración de WP
+$trash_is_disabled = (defined('EMPTY_TRASH_DAYS') && EMPTY_TRASH_DAYS == 0);
+
+// SQL: Buscar adjuntos con status 'trash'
+$sql = "SELECT ID, post_title, post_date, post_modified, guid 
+        FROM $wpdb->posts 
+        WHERE post_type = 'attachment' 
+        AND post_status = 'trash' 
+        ORDER BY post_modified DESC 
+        LIMIT 100"; // Límite de seguridad
+
+$trashed_items = $wpdb->get_results($sql);
 ?>
 
 <div class="maw-wrap">
+    <!-- Cabecera -->
     <div class="maw-header">
         <div class="maw-title">
             <h1><span class="dashicons dashicons-undo"></span> Recuperación de Archivos</h1>
         </div>
+        <div>
+            <span class="maw-badge" style="background:#666;">Papelera del Sistema</span>
+        </div>
     </div>
 
-    <?php if (!defined('EMPTY_TRASH_DAYS') || EMPTY_TRASH_DAYS == 0) : ?>
+    <!-- Advertencia Crítica si la papelera está desactivada en wp-config.php -->
+    <?php if ($trash_is_disabled) : ?>
         <div class="notice notice-error inline">
-            <p><strong>ADVERTENCIA CRÍTICA:</strong> La papelera está desactivada en tu instalación (`EMPTY_TRASH_DAYS=0`). Los archivos borrados en la pestaña Escáner desaparecerán permanentemente.</p>
+            <p><strong>⚠️ ADVERTENCIA CRÍTICA:</strong> Tu WordPress tiene la papelera desactivada (`EMPTY_TRASH_DAYS = 0`). 
+            Cualquier archivo que borres <strong>desaparecerá permanentemente</strong> y no aparecerá en esta lista. 
+            Para arreglarlo, edita tu wp-config.php y elimina esa línea o ponle valor 30.</p>
         </div>
     <?php endif; ?>
 
+    <!-- Tabla de Recuperación -->
     <div class="maw-card">
-        <table class="maw-table">
+        <p class="description" style="margin-bottom:20px;">
+            Aquí se muestran los archivos eliminados recientemente. Si vacías la papelera, se perderán para siempre.
+        </p>
+
+        <table class="maw-table-view">
             <thead>
                 <tr>
-                    <th width="60">Vista</th>
-                    <th>Nombre de Archivo</th>
+                    <th width="80">Vista</th>
+                    <th>Detalles del Archivo</th>
                     <th>Fecha de Eliminación</th>
-                    <th>Acción</th>
+                    <th width="150">Acción</th>
                 </tr>
             </thead>
             <tbody>
-                <?php if ($query->have_posts()) : while ($query->have_posts()) : $query->the_post(); 
-                    $id = get_the_ID();
-                    $thumb = wp_get_attachment_image_src($id, 'thumbnail');
-                    $filename = basename(get_attached_file($id));
-                ?>
-                <tr>
-                    <td>
-                        <?php if($thumb): ?>
-                            <img src="<?php echo esc_url($thumb[0]); ?>" class="maw-img-preview">
-                        <?php else: ?>
-                            <div class="maw-img-preview" style="display:flex;align-items:center;justify-content:center;">?</div>
-                        <?php endif; ?>
-                    </td>
-                    <td>
-                        <strong><?php echo esc_html(get_the_title()); ?></strong><br>
-                        <small style="color:#888"><?php echo esc_html($filename); ?></small>
-                    </td>
-                    <td><?php echo get_the_modified_date('Y-m-d H:i'); ?></td>
-                    <td>
-                        <form method="post">
-                            <?php wp_nonce_field('maw_rest', 'maw_nonce'); ?>
-                            <input type="hidden" name="restore_id" value="<?php echo $id; ?>">
-                            <button type="submit" class="button button-primary">Restaurar</button>
-                        </form>
-                    </td>
-                </tr>
-                <?php endwhile; else: ?>
+                <?php if (!empty($trashed_items)) : ?>
+                    <?php foreach ($trashed_items as $item) : 
+                        $id = $item->ID;
+                        // Intentar obtener miniatura (puede fallar si el archivo físico se borró, por eso el fallback)
+                        $thumb = wp_get_attachment_image_src($id, 'thumbnail');
+                        $filename = basename(get_attached_file($id)); 
+                        if(!$filename) $filename = basename($item->guid); // Fallback
+                    ?>
                     <tr>
-                        <td colspan="4" style="text-align:center; padding:30px;">
-                            <span class="dashicons dashicons-yes" style="font-size:40px; color:var(--maw-success); height:40px; width:40px;"></span>
-                            <p>La papelera está vacía. ¡Buen trabajo!</p>
+                        <td>
+                            <?php if ($thumb) : ?>
+                                <img src="<?php echo esc_url($thumb[0]); ?>" class="maw-table-img" style="opacity:0.6;">
+                            <?php else : ?>
+                                <div class="maw-table-img" style="background:#eee; display:flex; align-items:center; justify-content:center; color:#888;">
+                                    <span class="dashicons dashicons-no-alt"></span>
+                                </div>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <strong><?php echo esc_html($item->post_title ?: '(Sin Título)'); ?></strong><br>
+                            <small style="color:#888;">Archivo: <?php echo esc_html($filename); ?></small><br>
+                            <small style="color:#888;">ID: <?php echo $id; ?></small>
+                        </td>
+                        <td>
+                            <?php 
+                            // post_modified suele ser la fecha en que se movió a papelera
+                            echo date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($item->post_modified)); 
+                            ?>
+                        </td>
+                        <td>
+                            <form method="post">
+                                <?php wp_nonce_field('maw_rest', 'maw_nonce'); ?>
+                                <input type="hidden" name="restore_id" value="<?php echo $id; ?>">
+                                <button type="submit" class="button button-primary">
+                                    <span class="dashicons dashicons-image-rotate"></span> Restaurar
+                                </button>
+                            </form>
                         </td>
                     </tr>
-                <?php endif; wp_reset_postdata(); ?>
+                    <?php endforeach; ?>
+                <?php else : ?>
+                    <!-- Estado Vacío -->
+                    <tr>
+                        <td colspan="4" style="text-align:center; padding:40px 20px;">
+                            <div style="color:#ccc; margin-bottom:10px;">
+                                <span class="dashicons dashicons-trash" style="font-size:60px; width:60px; height:60px;"></span>
+                            </div>
+                            <h3 style="margin:0; color:#666;">La papelera está vacía</h3>
+                            <p style="color:#888;">No hay archivos pendientes de recuperación.</p>
+                        </td>
+                    </tr>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
