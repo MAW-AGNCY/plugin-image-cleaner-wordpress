@@ -107,3 +107,7 @@
 /* ALERT BOX */
 .maw-alert { padding: 15px; border-left: 4px solid var(--maw-primary); background: #fff; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 .maw-alert.warning { border-color: var(--maw-warning); }
+
+/* WOOCOMMERCE BADGE */
+.status-badge.woo { background: #7f54b3 !important; color: #fff !important; border: none; }
+.maw-grid-item.woo { border-color: #7f54b3; }
