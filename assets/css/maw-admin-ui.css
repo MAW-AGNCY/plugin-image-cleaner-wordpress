@@ -1,53 +1,63 @@
-/* VARIABLES Y RESET */
 :root {
-    --maw-primary: #2271b1;
-    --maw-primary-dark: #135e96;
-    --maw-success: #00a32a;
-    --maw-warning: #f0b849;
-    --maw-danger: #d63638;
-    --maw-bg: #f0f0f1;
-    --maw-text: #3c434a;
+    --maw-primary: #2271b1; /* Azul WP */
+    --maw-primary-hover: #135e96;
+    --maw-dark: #1d2327;
+    --maw-light: #f0f0f1;
+    --maw-white: #ffffff;
     --maw-border: #c3c4c7;
+    --maw-success: #00a32a;
+    --maw-warning: #dba617;
+    --maw-danger: #d63638;
+    --maw-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-.maw-wrap { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif; margin: 20px 20px 0 0; }
+/* LAYOUT GENERAL */
+.maw-wrap { margin: 20px 20px 0 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+.maw-header { background: var(--maw-white); padding: 20px; border: 1px solid var(--maw-border); border-left: 4px solid var(--maw-primary); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--maw-shadow); }
+.maw-title h1 { margin: 0; font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+.maw-badge { background: var(--maw-primary); color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle; }
 
-/* HEADER */
-.maw-header { background: #fff; padding: 20px; border: 1px solid var(--maw-border); border-left: 4px solid var(--maw-primary); display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-.maw-title h1 { margin: 0; font-weight: 700; color: var(--maw-primary); font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
-.maw-badge { background: var(--maw-primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
+/* DASHBOARD CARDS */
+.maw-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
+.maw-card { background: var(--maw-white); padding: 25px; border: 1px solid var(--maw-border); border-radius: 4px; box-shadow: var(--maw-shadow); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s; }
+.maw-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+.maw-card h3 { margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; color: #646970; letter-spacing: 0.5px; }
+.maw-card .stat-number { font-size: 32px; font-weight: 700; color: var(--maw-dark); line-height: 1; margin-bottom: 5px; }
+.maw-card .stat-desc { font-size: 12px; color: #646970; }
 
-/* BADGES DE ESTADO (USABILIDAD) */
-.maw-status { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 12px; }
-.maw-status.in-use { background: #edfaef; color: var(--maw-success); border: 1px solid #c3e6cb; }
-.maw-status.unused { background: #fbeaea; color: var(--maw-danger); border: 1px solid #f5c6cb; }
-.maw-status.protected { background: #fff8e5; color: #b7791f; border: 1px solid #f0b849; }
+/* TOOLBAR & FILTERS */
+.maw-toolbar { background: var(--maw-white); padding: 10px 15px; border: 1px solid var(--maw-border); display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-radius: 4px; }
+.maw-view-switcher .button.active { background: var(--maw-primary); color: white; border-color: var(--maw-primary); }
 
-/* GRID VIEW MEJORADA */
-.maw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; margin-top: 20px; }
-.maw-card-img { background: #fff; border: 1px solid var(--maw-border); border-radius: 6px; overflow: hidden; transition: all 0.2s; position: relative; display: flex; flex-direction: column; }
-.maw-card-img:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: var(--maw-primary); }
-.maw-card-img.selected { border-color: var(--maw-danger); box-shadow: 0 0 0 2px var(--maw-danger); }
+/* VISTA: GRID (CUADRÍCULA) */
+.maw-grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+.maw-grid-item { background: var(--maw-white); border: 1px solid var(--maw-border); border-radius: 4px; overflow: hidden; position: relative; transition: all 0.2s; }
+.maw-grid-item:hover { border-color: var(--maw-primary); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+.maw-grid-item.selected { border-color: var(--maw-primary); box-shadow: 0 0 0 2px var(--maw-primary) inset; background: #f0f6fc; }
+.maw-thumb { height: 120px; background: #eee; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+.maw-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.maw-grid-details { padding: 10px; font-size: 12px; }
+.maw-filename { font-weight: 600; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.maw-checkbox-overlay { position: absolute; top: 8px; left: 8px; z-index: 10; transform: scale(1.2); }
 
-.maw-thumb-wrapper { height: 140px; background: #eee; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-.maw-thumb-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-.maw-checkbox-overlay { position: absolute; top: 10px; left: 10px; z-index: 10; transform: scale(1.3); cursor: pointer; }
+/* VISTA: LISTA (TABLA) */
+.maw-table-view { width: 100%; border-collapse: collapse; background: var(--maw-white); border: 1px solid var(--maw-border); box-shadow: var(--maw-shadow); }
+.maw-table-view th { text-align: left; padding: 12px; background: #f6f7f7; border-bottom: 1px solid var(--maw-border); font-weight: 600; }
+.maw-table-view td { padding: 12px; border-bottom: 1px solid #f0f0f1; vertical-align: middle; }
+.maw-table-view tr:hover { background: #f6f7f7; }
+.maw-table-img { width: 50px; height: 50px; object-fit: cover; border-radius: 3px; border: 1px solid #ddd; }
 
-.maw-card-body { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-.maw-filename { font-weight: 600; font-size: 13px; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.maw-meta { font-size: 11px; color: #646970; margin-bottom: 8px; }
+/* ESTADOS Y BADGES */
+.status-badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; gap: 5px; }
+.status-badge.in-use { background: #edfaef; color: var(--maw-success); }
+.status-badge.unused { background: #fbeaea; color: var(--maw-danger); }
+.status-badge.protected { background: #fff8e5; color: #996800; }
 
-/* DETALLES DE USO */
-.maw-usage-list { margin: 5px 0 0; padding: 0; list-style: none; font-size: 11px; }
-.maw-usage-item { display: flex; align-items: center; gap: 4px; color: var(--maw-text); }
-.maw-usage-item a { text-decoration: none; color: var(--maw-primary); }
+/* SECCIÓN DE AYUDA (ACORDEÓN) */
+.maw-accordion { border: 1px solid var(--maw-border); background: var(--maw-white); border-radius: 4px; margin-bottom: 10px; }
+.maw-accordion-header { padding: 15px; background: #f6f7f7; cursor: pointer; font-weight: 600; display: flex; justify-content: space-between; }
+.maw-accordion-content { padding: 15px; display: none; border-top: 1px solid var(--maw-border); line-height: 1.6; }
+.maw-accordion.active .maw-accordion-content { display: block; }
 
-/* HELPER CLASSES */
-.maw-flex-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.maw-btn-block { display: block; width: 100%; text-align: center; margin-top: 5px; }
-.maw-tooltip { cursor: help; border-bottom: 1px dotted #999; }
-
-/* PAGINACIÓN */
-.maw-pagination { margin-top: 20px; display: flex; gap: 5px; justify-content: center; }
-.maw-page-link { padding: 5px 10px; border: 1px solid var(--maw-border); background: #fff; text-decoration: none; color: var(--maw-text); border-radius: 3px; }
-.maw-page-link.current { background: var(--maw-primary); color: white; border-color: var(--maw-primary); }
+/* NOTIFICACIONES Y EMAILS */
+.maw-email-preview { background: #fff; border: 1px dashed #ccc; padding: 20px; margin-top: 20px; max-width: 600px; }
