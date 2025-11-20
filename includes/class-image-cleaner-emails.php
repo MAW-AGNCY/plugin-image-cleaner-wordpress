@@ -1,77 +1,42 @@
 <?php
-if (!defined('ABSPATH')) {
-    exit; // Exit if accessed directly
-}
+if (!defined('ABSPATH')) exit;
 
-class Image_Cleaner_Emails {
-
-    public function __construct() {
-        add_action('image_cleaner_daily_summary', [$this, 'send_daily_summary']);
-    }
-
+class MAW_Email_Manager {
     /**
-     * Schedule a daily summary email event.
+     * Envía correo HTML forzando content-type.
      */
-    public static function schedule_email_event() {
-        if (!wp_next_scheduled('image_cleaner_daily_summary')) {
-            wp_schedule_event(time(), 'daily', 'image_cleaner_daily_summary');
-        }
-    }
+    public static function send($to, $subject, $template_name, $data = []) {
+        
+        // 1. Forzar Header HTML
+        add_filter('wp_mail_content_type', [__CLASS__, 'set_html_content_type']);
 
-    /**
-     * Clear the scheduled email event on plugin deactivation.
-     */
-    public static function clear_email_event() {
-        wp_clear_scheduled_hook('image_cleaner_daily_summary');
-    }
-
-    /**
-     * Send a daily summary email.
-     */
-    public function send_daily_summary() {
-        $email_recipient = get_option('image_cleaner_email_recipient', get_option('admin_email'));
-        $subject = __('Daily Image Cleaner Summary', 'image-cleaner');
-        $message = $this->generate_summary_message();
-
-        if (!is_email($email_recipient)) {
-            error_log(__('Invalid email address for Image Cleaner summary.', 'image-cleaner'));
-            return;
+        // 2. Cargar o crear plantilla
+        $file = IMAGE_CLEANER_PLUGIN_DIR . 'templates/emails/' . $template_name . '.html';
+        if (file_exists($file)) {
+            $body = file_get_contents($file);
+        } else {
+            $body = '<div style="background:#f5f5f5; padding:20px;"><div style="background:#fff; padding:20px;"><h1>MAW Cleaner</h1><p>{{message}}</p></div></div>';
         }
 
-        $sent = wp_mail($email_recipient, $subject, $message);
+        // 3. Reemplazar variables
+        $data['{{site_name}}'] = get_bloginfo('name');
+        $data['{{year}}'] = date('Y');
+        if(!isset($data['{{message}}'])) $data['{{message}}'] = 'Notificación del sistema.';
 
-        if (!$sent) {
-            error_log(__('Failed to send Image Cleaner summary email.', 'image-cleaner'));
-        }
-    }
-
-    /**
-     * Generate the summary message for the email.
-     *
-     * @return string The summary message.
-     */
-    private function generate_summary_message() {
-        $data = $this->get_summary_data();
-        $message = __('Here is the daily summary of the Image Cleaner plugin:', 'image-cleaner') . "\n\n";
-
-        foreach ($data as $key => $value) {
-            $message .= sprintf('%s: %s', ucfirst($key), $value) . "\n";
+        foreach ($data as $key => $val) {
+            $body = str_replace($key, $val, $body);
         }
 
-        return $message;
+        // 4. Enviar
+        $result = wp_mail($to, $subject, $body);
+
+        // 5. Limpiar filtro
+        remove_filter('wp_mail_content_type', [__CLASS__, 'set_html_content_type']);
+
+        return $result;
     }
 
-    /**
-     * Retrieve data for the summary email.
-     *
-     * @return array Summary data.
-     */
-    private function get_summary_data() {
-        // Example data, replace with actual logic.
-        return [
-            'total_images' => 1200,
-            'cleaned_images' => 45,
-            'recovered_images' => 5,
-        ];
+    public static function set_html_content_type() {
+        return 'text/html';
     }
 }
